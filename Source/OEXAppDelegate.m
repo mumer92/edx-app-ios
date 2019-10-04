@@ -8,6 +8,7 @@
 
 @import edXCore;
 @import FirebaseAnalytics;
+@import GoogleCast;
 #import <Crashlytics/Crashlytics.h>
 #import <Fabric/Fabric.h>
 #import <FBSDKCoreKit/FBSDKCoreKit.h>
@@ -37,7 +38,7 @@
 #import "OEXSession.h"
 #import "OEXSegmentConfig.h"
 
-@interface OEXAppDelegate () <UIApplicationDelegate>
+@interface OEXAppDelegate () <UIApplicationDelegate, GCKLoggerDelegate>
 
 @property (nonatomic, strong) NSMutableDictionary* dictCompletionHandler;
 @property (nonatomic, strong) OEXEnvironment* environment;
@@ -48,6 +49,8 @@
 @implementation OEXAppDelegate
 
 @synthesize window = _window;
+
+static const BOOL kDebugLoggingEnabled = YES;
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
 #if DEBUG
@@ -80,6 +83,13 @@
     [self.environment.router openInWindow:self.window];
     [self configureFabricKits:launchOptions];
     [[FBSDKApplicationDelegate sharedInstance] application:application didFinishLaunchingWithOptions:launchOptions];
+    
+    GCKDiscoveryCriteria *criteria = [[GCKDiscoveryCriteria alloc] initWithApplicationID: kGCKDefaultMediaReceiverApplicationID];
+    GCKCastOptions *options = [[GCKCastOptions alloc] initWithDiscoveryCriteria:criteria];
+    [GCKCastContext setSharedInstanceWithOptions:options];
+    
+    // Enable logger.
+    [GCKLogger sharedInstance].delegate = self;
     
     return YES;
 }
@@ -239,5 +249,14 @@
         }
     }
 }
+
+#pragma mark - GCKLoggerDelegate
+
+- (void)logMessage:(NSString *)message atLevel:(GCKLoggerLevel)level fromFunction:(NSString *)function location:(NSString *)location {
+    if (kDebugLoggingEnabled) {
+        NSLog(@"%@ - %@, %@", function, message, location);
+    }
+}
+
 
 @end

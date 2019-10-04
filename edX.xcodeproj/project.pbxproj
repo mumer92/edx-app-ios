@@ -11,6 +11,18 @@
 		021AD6281F166F78009AF653 /* CourseCatalogDetailViewControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 777DE7171C1649630068E280 /* CourseCatalogDetailViewControllerTests.swift */; };
 		021AD6291F166F7F009AF653 /* Dictionary+SafeAccessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 021AD6261F166331009AF653 /* Dictionary+SafeAccessTests.swift */; };
 		0B1212221B4F089A002EE96C /* OEXCoursewareAccess.m in Sources */ = {isa = PBXBuildFile; fileRef = 0B1212211B4F089A002EE96C /* OEXCoursewareAccess.m */; };
+		0D939F922347706C0097B0CC /* GoogleCast.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D939F8E2347704C0097B0CC /* GoogleCast.framework */; };
+		0D939F932347706C0097B0CC /* GoogleCast.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 0D939F8E2347704C0097B0CC /* GoogleCast.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		0D939F952347708D0097B0CC /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D939F942347708D0097B0CC /* Accelerate.framework */; };
+		0D939F972347709B0097B0CC /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D939F962347709B0097B0CC /* AudioToolbox.framework */; };
+		0D939F99234770A50097B0CC /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D939F98234770A40097B0CC /* CFNetwork.framework */; };
+		0D939F9B234770B40097B0CC /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D939F9A234770B40097B0CC /* AVFoundation.framework */; };
+		0D939F9D234770BD0097B0CC /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D939F9C234770BD0097B0CC /* CoreBluetooth.framework */; };
+		0D939F9F234770C80097B0CC /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D939F9E234770C80097B0CC /* CoreData.framework */; };
+		0D939FA1234770E50097B0CC /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D939FA0234770E50097B0CC /* CoreText.framework */; };
+		0D939FA4234770F80097B0CC /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D939FA2234770F80097B0CC /* MediaPlayer.framework */; };
+		0D939FA5234770F80097B0CC /* MediaAccessibility.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D939FA3234770F80097B0CC /* MediaAccessibility.framework */; };
+		0D939FA72347710E0097B0CC /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D939FA62347710E0097B0CC /* Security.framework */; };
 		1904A14C1A1386C2006A5524 /* OEXDBManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 1904A1401A1386C2006A5524 /* OEXDBManager.m */; };
 		1904A14D1A1386C2006A5524 /* edXDB.xcdatamodel in Sources */ = {isa = PBXBuildFile; fileRef = 1904A1411A1386C2006A5524 /* edXDB.xcdatamodel */; };
 		1904A14E1A1386C2006A5524 /* VideoData.m in Sources */ = {isa = PBXBuildFile; fileRef = 1904A1431A1386C2006A5524 /* VideoData.m */; };
@@ -900,6 +912,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				0D939F932347706C0097B0CC /* GoogleCast.framework in Embed Frameworks */,
 				77E647CB1C90CA1400B6740D /* edXCore.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -912,6 +925,17 @@
 		021AD6261F166331009AF653 /* Dictionary+SafeAccessTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Dictionary+SafeAccessTests.swift"; sourceTree = "<group>"; };
 		0B1212211B4F089A002EE96C /* OEXCoursewareAccess.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEXCoursewareAccess.m; sourceTree = "<group>"; };
 		0B1212231B4F08B6002EE96C /* OEXCoursewareAccess.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OEXCoursewareAccess.h; sourceTree = "<group>"; };
+		0D939F8E2347704C0097B0CC /* GoogleCast.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GoogleCast.framework; path = Libraries/Cast/GoogleCast.framework; sourceTree = "<group>"; };
+		0D939F942347708D0097B0CC /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
+		0D939F962347709B0097B0CC /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		0D939F98234770A40097B0CC /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
+		0D939F9A234770B40097B0CC /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		0D939F9C234770BD0097B0CC /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
+		0D939F9E234770C80097B0CC /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		0D939FA0234770E50097B0CC /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
+		0D939FA2234770F80097B0CC /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
+		0D939FA3234770F80097B0CC /* MediaAccessibility.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaAccessibility.framework; path = System/Library/Frameworks/MediaAccessibility.framework; sourceTree = SDKROOT; };
+		0D939FA62347710E0097B0CC /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		1904A1401A1386C2006A5524 /* OEXDBManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEXDBManager.m; sourceTree = "<group>"; };
 		1904A1411A1386C2006A5524 /* edXDB.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = edXDB.xcdatamodel; sourceTree = "<group>"; };
 		1904A1421A1386C2006A5524 /* OEXStorageInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEXStorageInterface.h; sourceTree = "<group>"; };
@@ -2018,21 +2042,32 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				776F39291B4EF4CD00ED11E3 /* WebKit.framework in Frameworks */,
+				0D939FA72347710E0097B0CC /* Security.framework in Frameworks */,
 				805329121B0EA2DC0093B177 /* QuartzCore.framework in Frameworks */,
+				0D939FA4234770F80097B0CC /* MediaPlayer.framework in Frameworks */,
+				0D939FA5234770F80097B0CC /* MediaAccessibility.framework in Frameworks */,
+				0D939FA1234770E50097B0CC /* CoreText.framework in Frameworks */,
+				B4A24D0D19EE8A6600CE5010 /* CoreMedia.framework in Frameworks */,
+				BECB7B111924C0C3009C77F1 /* CoreGraphics.framework in Frameworks */,
+				0D939F9F234770C80097B0CC /* CoreData.framework in Frameworks */,
+				0D939F9D234770BD0097B0CC /* CoreBluetooth.framework in Frameworks */,
+				0D939F9B234770B40097B0CC /* AVFoundation.framework in Frameworks */,
+				0D939F99234770A50097B0CC /* CFNetwork.framework in Frameworks */,
+				0D939F972347709B0097B0CC /* AudioToolbox.framework in Frameworks */,
+				0D939F952347708D0097B0CC /* Accelerate.framework in Frameworks */,
+				776F39291B4EF4CD00ED11E3 /* WebKit.framework in Frameworks */,
 				8F562F901A1F451600320DB3 /* CoreMotion.framework in Frameworks */,
 				8F562F8E1A1F450A00320DB3 /* AssetsLibrary.framework in Frameworks */,
 				8F562F8C1A1F44FC00320DB3 /* AddressBook.framework in Frameworks */,
 				77E647A31C90C10300B6740D /* edXCore.framework in Frameworks */,
-				B4A24D0D19EE8A6600CE5010 /* CoreMedia.framework in Frameworks */,
 				77ACA1CB1A323C2500039AD1 /* Fabric.framework in Frameworks */,
 				BE8163F61954244E00F9A2C5 /* MessageUI.framework in Frameworks */,
 				E02661732269A821002721B7 /* libOCMock.a in Frameworks */,
+				0D939F922347706C0097B0CC /* GoogleCast.framework in Frameworks */,
 				BE0EE28B192B78DA00F9FF98 /* libz.dylib in Frameworks */,
 				77ACA1CA1A323C2500039AD1 /* Crashlytics.framework in Frameworks */,
 				BE0EE289192B78CF00F9FF98 /* SystemConfiguration.framework in Frameworks */,
 				BE0EE287192B78C400F9FF98 /* CoreTelephony.framework in Frameworks */,
-				BECB7B111924C0C3009C77F1 /* CoreGraphics.framework in Frameworks */,
 				BECB7B131924C0C3009C77F1 /* UIKit.framework in Frameworks */,
 				BECB7B0F1924C0C3009C77F1 /* Foundation.framework in Frameworks */,
 				8B900B2EB01D16A88A33BBF5 /* libPods-edX.a in Frameworks */,
@@ -3640,6 +3675,17 @@
 		BECB7B0D1924C0C3009C77F1 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				0D939FA62347710E0097B0CC /* Security.framework */,
+				0D939FA3234770F80097B0CC /* MediaAccessibility.framework */,
+				0D939FA2234770F80097B0CC /* MediaPlayer.framework */,
+				0D939FA0234770E50097B0CC /* CoreText.framework */,
+				0D939F9E234770C80097B0CC /* CoreData.framework */,
+				0D939F9C234770BD0097B0CC /* CoreBluetooth.framework */,
+				0D939F9A234770B40097B0CC /* AVFoundation.framework */,
+				0D939F98234770A40097B0CC /* CFNetwork.framework */,
+				0D939F962347709B0097B0CC /* AudioToolbox.framework */,
+				0D939F942347708D0097B0CC /* Accelerate.framework */,
+				0D939F8E2347704C0097B0CC /* GoogleCast.framework */,
 				776F39281B4EF4CD00ED11E3 /* WebKit.framework */,
 				805329111B0EA2DC0093B177 /* QuartzCore.framework */,
 				77ACA1C81A323C2500039AD1 /* Crashlytics.framework */,
@@ -4170,6 +4216,9 @@
 						LastSwiftMigration = 1030;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
+							com.apple.AccessWiFi = {
+								enabled = 1;
+							};
 							com.apple.BackgroundModes = {
 								enabled = 1;
 							};
@@ -5525,6 +5574,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/Libraries/",
+					"$(PROJECT_DIR)/Libraries/Cast",
 				);
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -5978,6 +6028,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/Libraries/",
+					"$(PROJECT_DIR)/Libraries/Cast",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Source/edX-Prefix.pch";
@@ -6021,6 +6072,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/Libraries/",
+					"$(PROJECT_DIR)/Libraries/Cast",
 				);
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;

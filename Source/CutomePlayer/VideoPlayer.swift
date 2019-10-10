@@ -9,11 +9,14 @@
 
 import UIKit
 import AVKit
+import GoogleCast
 
 private enum PlayerState {
     case playing,
          paused,
-         stop
+         stop,
+         chromeCastConnected,
+         playingOnChromeCast
 }
 
 private let currentItemStatusKey = "currentItem.status"
@@ -137,6 +140,9 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         return view
     }()
     
+    private let castManager = ChromeCastManager.shared
+    private let videoURL = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+
     init(environment : Environment) {
         self.environment = environment
         
@@ -153,6 +159,43 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         view.backgroundColor = .black
         loadingIndicatorView.hidesWhenStopped = true
         createControls()
+    }
+    
+    func checkIfChromecastIsConnected() {
+        if castManager.isconnectedToChromeCast {
+            playerState = .chromeCastConnected
+        }
+    }
+    
+    private func playRemotely(video: OEXHelperVideoDownload) {
+        guard let videoURL = video.summary?.videoURL, var url = URL(string: videoURL) else {
+            return
+        }
+        
+        self.video = video
+        controls?.video = video
+        let fileManager = FileManager.default
+        let path = "\(video.filePath).mp4"
+        let fileExists : Bool = fileManager.fileExists(atPath: path)
+        if fileExists {
+            url = URL(fileURLWithPath: path)
+        }
+        else if video.downloadState == .complete {
+            playerDelegate?.playerDidFailedPlaying(videoPlayer: self, errorMessage: Strings.videoContentNotAvailable)
+        }
+                
+        //guard let currentItem = player.currentItem else { return }
+        let duration = 0.0
+        
+        let castMediaInfo = castManager.buildMediaInformation(contentID: url.absoluteString, title: video.summary?.name ?? "", description: "", studio: "", duration: duration, streamType: GCKMediaStreamType.buffered, thumbnailUrl: nil, customData: nil)
+        
+        castManager.startPlayingItemOnChromeCast(mediaInfo: castMediaInfo, at: 0) { done in
+            if done {
+                print("done")
+            } else {
+                print("something whent wrong")
+            }
+        }
     }
     
     private func addObservers() {
@@ -292,6 +335,7 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         super.viewDidAppear(animated)
         isVisible = true
         applyScreenOrientation()
+        checkIfChromecastIsConnected()
     }
     
     private func applyScreenOrientation() {
@@ -303,6 +347,14 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
     }
     
     func play(video: OEXHelperVideoDownload) {
+        if castManager.isconnectedToChromeCast {
+            playRemotely(video: video)
+        } else {
+            playLocally(video: video)
+        }
+    }
+    
+    private func playLocally(video: OEXHelperVideoDownload) {
         guard let videoURL = video.summary?.videoURL, var url = URL(string: videoURL) else {
             return
         }

@@ -11,8 +11,11 @@
 		021AD6281F166F78009AF653 /* CourseCatalogDetailViewControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 777DE7171C1649630068E280 /* CourseCatalogDetailViewControllerTests.swift */; };
 		021AD6291F166F7F009AF653 /* Dictionary+SafeAccessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 021AD6261F166331009AF653 /* Dictionary+SafeAccessTests.swift */; };
 		0B1212221B4F089A002EE96C /* OEXCoursewareAccess.m in Sources */ = {isa = PBXBuildFile; fileRef = 0B1212211B4F089A002EE96C /* OEXCoursewareAccess.m */; };
-		0D939F922347706C0097B0CC /* GoogleCast.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D939F8E2347704C0097B0CC /* GoogleCast.framework */; };
-		0D939F932347706C0097B0CC /* GoogleCast.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 0D939F8E2347704C0097B0CC /* GoogleCast.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		0D0A818C234F20E4000D4EBB /* GoogleCast.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D0A8189234F1F90000D4EBB /* GoogleCast.framework */; };
+		0D0A818E234F21EB000D4EBB /* GoogleCast.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D0A8189234F1F90000D4EBB /* GoogleCast.framework */; };
+		0D0A818F234F21EB000D4EBB /* GoogleCast.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 0D0A8189234F1F90000D4EBB /* GoogleCast.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		0D0A8191234F2225000D4EBB /* GoogleCast.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D0A8190234F2225000D4EBB /* GoogleCast.framework */; };
+		0D0A8193234F2282000D4EBB /* GoogleCast.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D0A8190234F2225000D4EBB /* GoogleCast.framework */; };
 		0D939F952347708D0097B0CC /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D939F942347708D0097B0CC /* Accelerate.framework */; };
 		0D939F972347709B0097B0CC /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D939F962347709B0097B0CC /* AudioToolbox.framework */; };
 		0D939F99234770A50097B0CC /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D939F98234770A40097B0CC /* CFNetwork.framework */; };
@@ -23,6 +26,8 @@
 		0D939FA4234770F80097B0CC /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D939FA2234770F80097B0CC /* MediaPlayer.framework */; };
 		0D939FA5234770F80097B0CC /* MediaAccessibility.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D939FA3234770F80097B0CC /* MediaAccessibility.framework */; };
 		0D939FA72347710E0097B0CC /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D939FA62347710E0097B0CC /* Security.framework */; };
+		0D939FA9234B84070097B0CC /* CastButtonDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D939FA8234B84060097B0CC /* CastButtonDelegate.swift */; };
+		0DC21EA0234E08AC008BFDFA /* ChromeCastManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DC21E9F234E08AC008BFDFA /* ChromeCastManager.swift */; };
 		1904A14C1A1386C2006A5524 /* OEXDBManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 1904A1401A1386C2006A5524 /* OEXDBManager.m */; };
 		1904A14D1A1386C2006A5524 /* edXDB.xcdatamodel in Sources */ = {isa = PBXBuildFile; fileRef = 1904A1411A1386C2006A5524 /* edXDB.xcdatamodel */; };
 		1904A14E1A1386C2006A5524 /* VideoData.m in Sources */ = {isa = PBXBuildFile; fileRef = 1904A1431A1386C2006A5524 /* VideoData.m */; };
@@ -912,7 +917,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				0D939F932347706C0097B0CC /* GoogleCast.framework in Embed Frameworks */,
+				0D0A818F234F21EB000D4EBB /* GoogleCast.framework in Embed Frameworks */,
 				77E647CB1C90CA1400B6740D /* edXCore.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -925,7 +930,8 @@
 		021AD6261F166331009AF653 /* Dictionary+SafeAccessTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Dictionary+SafeAccessTests.swift"; sourceTree = "<group>"; };
 		0B1212211B4F089A002EE96C /* OEXCoursewareAccess.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEXCoursewareAccess.m; sourceTree = "<group>"; };
 		0B1212231B4F08B6002EE96C /* OEXCoursewareAccess.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OEXCoursewareAccess.h; sourceTree = "<group>"; };
-		0D939F8E2347704C0097B0CC /* GoogleCast.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GoogleCast.framework; path = Libraries/Cast/GoogleCast.framework; sourceTree = "<group>"; };
+		0D0A8189234F1F90000D4EBB /* GoogleCast.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GoogleCast.framework; path = Libraries/Cast/GoogleCast.framework; sourceTree = "<group>"; };
+		0D0A8190234F2225000D4EBB /* GoogleCast.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GoogleCast.framework; path = Libraries/Cast/GoogleCast.framework; sourceTree = "<group>"; };
 		0D939F942347708D0097B0CC /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		0D939F962347709B0097B0CC /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		0D939F98234770A40097B0CC /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
@@ -936,6 +942,8 @@
 		0D939FA2234770F80097B0CC /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
 		0D939FA3234770F80097B0CC /* MediaAccessibility.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaAccessibility.framework; path = System/Library/Frameworks/MediaAccessibility.framework; sourceTree = SDKROOT; };
 		0D939FA62347710E0097B0CC /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		0D939FA8234B84060097B0CC /* CastButtonDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CastButtonDelegate.swift; sourceTree = "<group>"; };
+		0DC21E9F234E08AC008BFDFA /* ChromeCastManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChromeCastManager.swift; sourceTree = "<group>"; };
 		1904A1401A1386C2006A5524 /* OEXDBManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEXDBManager.m; sourceTree = "<group>"; };
 		1904A1411A1386C2006A5524 /* edXDB.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = edXDB.xcdatamodel; sourceTree = "<group>"; };
 		1904A1421A1386C2006A5524 /* OEXStorageInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEXStorageInterface.h; sourceTree = "<group>"; };
@@ -2042,6 +2050,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				77E647A31C90C10300B6740D /* edXCore.framework in Frameworks */,
+				0D0A818C234F20E4000D4EBB /* GoogleCast.framework in Frameworks */,
 				0D939FA72347710E0097B0CC /* Security.framework in Frameworks */,
 				805329121B0EA2DC0093B177 /* QuartzCore.framework in Frameworks */,
 				0D939FA4234770F80097B0CC /* MediaPlayer.framework in Frameworks */,
@@ -2058,15 +2068,15 @@
 				776F39291B4EF4CD00ED11E3 /* WebKit.framework in Frameworks */,
 				8F562F901A1F451600320DB3 /* CoreMotion.framework in Frameworks */,
 				8F562F8E1A1F450A00320DB3 /* AssetsLibrary.framework in Frameworks */,
+				0D0A818E234F21EB000D4EBB /* GoogleCast.framework in Frameworks */,
 				8F562F8C1A1F44FC00320DB3 /* AddressBook.framework in Frameworks */,
-				77E647A31C90C10300B6740D /* edXCore.framework in Frameworks */,
 				77ACA1CB1A323C2500039AD1 /* Fabric.framework in Frameworks */,
 				BE8163F61954244E00F9A2C5 /* MessageUI.framework in Frameworks */,
 				E02661732269A821002721B7 /* libOCMock.a in Frameworks */,
-				0D939F922347706C0097B0CC /* GoogleCast.framework in Frameworks */,
 				BE0EE28B192B78DA00F9FF98 /* libz.dylib in Frameworks */,
 				77ACA1CA1A323C2500039AD1 /* Crashlytics.framework in Frameworks */,
 				BE0EE289192B78CF00F9FF98 /* SystemConfiguration.framework in Frameworks */,
+				0D0A8191234F2225000D4EBB /* GoogleCast.framework in Frameworks */,
 				BE0EE287192B78C400F9FF98 /* CoreTelephony.framework in Frameworks */,
 				BECB7B131924C0C3009C77F1 /* UIKit.framework in Frameworks */,
 				BECB7B0F1924C0C3009C77F1 /* Foundation.framework in Frameworks */,
@@ -2078,6 +2088,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0D0A8193234F2282000D4EBB /* GoogleCast.framework in Frameworks */,
 				BECB7B301924C0C3009C77F1 /* UIKit.framework in Frameworks */,
 				BECB7B2F1924C0C3009C77F1 /* Foundation.framework in Frameworks */,
 				67FDC7528B4181D9153A7C36 /* Pods_edXTests.framework in Frameworks */,
@@ -2098,6 +2109,15 @@
 				C1061FFC436565270CDA40E3 /* Pods-edXTests.profile.xcconfig */,
 			);
 			name = Pods;
+			sourceTree = "<group>";
+		};
+		0D939FAA234C9F770097B0CC /* Cast */ = {
+			isa = PBXGroup;
+			children = (
+				0D939FA8234B84060097B0CC /* CastButtonDelegate.swift */,
+				0DC21E9F234E08AC008BFDFA /* ChromeCastManager.swift */,
+			);
+			name = Cast;
 			sourceTree = "<group>";
 		};
 		1904A13F1A13862F006A5524 /* CoreData */ = {
@@ -3650,6 +3670,7 @@
 		BECB7B021924C0C3009C77F1 = {
 			isa = PBXGroup;
 			children = (
+				0D0A8189234F1F90000D4EBB /* GoogleCast.framework */,
 				E052F5A81D9953BB009F6B6F /* edX.entitlements */,
 				77E647B11C90C21100B6740D /* App */,
 				BE76FEAA193C8D9C00BB9BDD /* External Libraries */,
@@ -3675,6 +3696,7 @@
 		BECB7B0D1924C0C3009C77F1 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				0D0A8190234F2225000D4EBB /* GoogleCast.framework */,
 				0D939FA62347710E0097B0CC /* Security.framework */,
 				0D939FA3234770F80097B0CC /* MediaAccessibility.framework */,
 				0D939FA2234770F80097B0CC /* MediaPlayer.framework */,
@@ -3685,7 +3707,6 @@
 				0D939F98234770A40097B0CC /* CFNetwork.framework */,
 				0D939F962347709B0097B0CC /* AudioToolbox.framework */,
 				0D939F942347708D0097B0CC /* Accelerate.framework */,
-				0D939F8E2347704C0097B0CC /* GoogleCast.framework */,
 				776F39281B4EF4CD00ED11E3 /* WebKit.framework */,
 				805329111B0EA2DC0093B177 /* QuartzCore.framework */,
 				77ACA1C81A323C2500039AD1 /* Crashlytics.framework */,
@@ -3748,6 +3769,7 @@
 				199B9B6419349DE800081A09 /* Videos */,
 				E0D1598F1EB87604005E2A76 /* WhatsNew */,
 				77ADF4A01AC1AD3500AC8955 /* XIB/Storyboard */,
+				0D939FAA234C9F770097B0CC /* Cast */,
 			);
 			path = Source;
 			sourceTree = "<group>";
@@ -4152,6 +4174,7 @@
 				77B4BAF31A52152A00B14C39 /* Upload Debugging Symbols */,
 				77E647AC1C90C10400B6740D /* Embed Frameworks */,
 				A5227C8DDB2ED6310729C274 /* [CP] Copy Pods Resources */,
+				38E5B85819A4D751629BEB86 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -4172,6 +4195,7 @@
 				BECB7B291924C0C3009C77F1 /* Frameworks */,
 				BECB7B2A1924C0C3009C77F1 /* Resources */,
 				F9A3F59C6DA487F859FE5E3F /* [CP] Embed Pods Frameworks */,
+				2C2D36734630904CFE0BC6F6 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -4214,7 +4238,7 @@
 					BECB7B0A1924C0C3009C77F1 = {
 						DevelopmentTeam = 57UCUYGPA2;
 						LastSwiftMigration = 1030;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.AccessWiFi = {
 								enabled = 1;
@@ -4544,6 +4568,44 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		2C2D36734630904CFE0BC6F6 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-edXTests/Pods-edXTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		38E5B85819A4D751629BEB86 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-edX/Pods-edX-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		7753912C1C9397CE00FA959C /* Copy config */ = {
@@ -5076,6 +5138,7 @@
 				B4B6D6391A95042B000F44E8 /* OEXCheckBoxView.m in Sources */,
 				1A22CD901B90B31A005B07D0 /* UIImage+OEXIcon.swift in Sources */,
 				1ACD163C1BB1BE63006ACC82 /* UserProfileViewController.swift in Sources */,
+				0DC21EA0234E08AC008BFDFA /* ChromeCastManager.swift in Sources */,
 				5D836DCA1B2FA12E00411CAB /* DiscussionNewCommentViewController.swift in Sources */,
 				1AFEB1B11BBD51EE004C471D /* JSONFormBuilderChooser.swift in Sources */,
 				19321F651961698B00B7D75C /* OEXDownloadTableCell.m in Sources */,
@@ -5083,6 +5146,7 @@
 				B7CCC730209B16B100A66923 /* ConstraintOffsetTarget.swift in Sources */,
 				E076A5C21C7DB624008A99C6 /* DiscussionResponsesDataController.swift in Sources */,
 				1A5AC5801B94ED0D00885187 /* CourseCardViewModel.swift in Sources */,
+				0D939FA9234B84070097B0CC /* CastButtonDelegate.swift in Sources */,
 				77FFA2CC1AC35CE800B4D69B /* OEXRegistrationStyles.m in Sources */,
 				77567B771AC9FC1400877A7B /* NSNotificationCenter+OEXSafeAccess.m in Sources */,
 				9E4E6C3F1B4BBB5C0034F7EB /* LastAccessedProvider.swift in Sources */,
@@ -5566,7 +5630,7 @@
 				CODE_SIGN_ENTITLEMENTS = edX.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				CONFIGURATION_BUILD_DIR = "$PODS_BUILD_DIR/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
 				DEVELOPMENT_TEAM = 57UCUYGPA2;
 				ENABLE_BITCODE = NO;
@@ -5592,10 +5656,11 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.edx.mobile;
 				PRODUCT_NAME = edX;
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = "iOS Development";
 				SWIFT_OBJC_BRIDGING_HEADER = "Source/edX-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/Libraries/Cast/GoogleCast.framework/Headers/GoogleCast.h";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Profile;
@@ -5612,6 +5677,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/Libraries/",
+					"$(PROJECT_DIR)/Libraries/Cast",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Source/edX-Prefix.pch";
@@ -5674,6 +5740,10 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Libraries/Cast",
+				);
 				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = Source/Core/SupportingFiles/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -5708,6 +5778,10 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Libraries/Cast",
+				);
 				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = Source/Core/SupportingFiles/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -5741,6 +5815,10 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Libraries/Cast",
+				);
 				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = Source/Core/SupportingFiles/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -6020,7 +6098,7 @@
 				CODE_SIGN_ENTITLEMENTS = edX.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				CONFIGURATION_BUILD_DIR = "$PODS_BUILD_DIR/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
 				DEVELOPMENT_TEAM = 57UCUYGPA2;
 				ENABLE_BITCODE = NO;
@@ -6045,11 +6123,12 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.edx.mobile;
 				PRODUCT_NAME = edX;
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = "iOS Development";
 				SWIFT_OBJC_BRIDGING_HEADER = "Source/edX-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/Libraries/Cast/GoogleCast.framework/Headers/GoogleCast.h";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -6064,7 +6143,7 @@
 				CODE_SIGN_ENTITLEMENTS = edX.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				CONFIGURATION_BUILD_DIR = "$PODS_BUILD_DIR/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
 				DEVELOPMENT_TEAM = 57UCUYGPA2;
 				ENABLE_BITCODE = NO;
@@ -6090,10 +6169,11 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.edx.mobile;
 				PRODUCT_NAME = edX;
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = "iOS Development";
 				SWIFT_OBJC_BRIDGING_HEADER = "Source/edX-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/Libraries/Cast/GoogleCast.framework/Headers/GoogleCast.h";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -6110,6 +6190,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/Libraries/",
+					"$(PROJECT_DIR)/Libraries/Cast",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Source/edX-Prefix.pch";
@@ -6170,6 +6251,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/Libraries/",
+					"$(PROJECT_DIR)/Libraries/Cast",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Source/edX-Prefix.pch";

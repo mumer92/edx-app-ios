@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import GoogleCast
 
 private enum TabBarOptions: Int {
     case Course, Program, CourseCatalog, Debug
@@ -41,7 +42,7 @@ class EnrolledTabBarViewController: UITabBarController, UITabBarControllerDelega
     private var profileFeed: Feed<UserProfile>?
     private let tabBarImageFontSize : CGFloat = 20
     static var courseCatalogIndex: Int = 0
-    
+
     private var screenTitle: String {
         guard let option = TabBarOptions.options.first else {return Strings.courses}
         return option.title(config: environment.config)
@@ -60,11 +61,17 @@ class EnrolledTabBarViewController: UITabBarController, UITabBarControllerDelega
         super.viewDidLoad()
         navigationItem.title = screenTitle
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
-        addAccountButton()
+        //addAccountButton()
         addProfileButton()
         setupProfileLoader()
         prepareTabViewData()
         delegate = self
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        addAccountButton()
     }
 
     override func didReceiveMemoryWarning() {
@@ -175,7 +182,10 @@ class EnrolledTabBarViewController: UITabBarController, UITabBarControllerDelega
         let accountButton = UIBarButtonItem(image: Icon.Account.imageWithFontSize(size: tabBarImageFontSize), style: .plain, target: nil, action: nil)
         accountButton.accessibilityLabel = Strings.userAccount
         accountButton.accessibilityIdentifier = "EnrolledTabBarViewController:account-button"
-        navigationItem.rightBarButtonItem = accountButton
+        
+        let castButton = GCKUICastButton(frame: CGRect(x: 0, y: 0, width: 24, height: 24))
+        castButton.tintColor = UIColor.gray
+        navigationItem.rightBarButtonItems = [accountButton, UIBarButtonItem(customView: castButton)]
         
         accountButton.oex_setAction { [weak self] in
             self?.environment.router?.showAccount(controller: self, modalTransitionStylePresent: true)

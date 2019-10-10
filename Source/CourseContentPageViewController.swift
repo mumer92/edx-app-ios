@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import GoogleCast
 
 public protocol CourseContentPageViewControllerDelegate : class {
     func courseContentPageViewController(controller : CourseContentPageViewController, enteredBlockWithID blockID : CourseBlockID, parentID : CourseBlockID)
@@ -22,7 +23,7 @@ extension CourseBlockDisplayType {
 }
 
 // Container for scrolling horizontally between different screens of course content
-public class CourseContentPageViewController : UIPageViewController, UIPageViewControllerDataSource, UIPageViewControllerDelegate, CourseBlockViewController, InterfaceOrientationOverriding {
+public class CourseContentPageViewController : UIPageViewController, UIPageViewControllerDataSource, UIPageViewControllerDelegate, CourseBlockViewController, InterfaceOrientationOverriding, CastButtonDelegate {
     
     public typealias Environment = OEXAnalyticsProvider & DataManagerProvider & OEXRouterProvider & OEXConfigProvider
     
@@ -45,6 +46,8 @@ public class CourseContentPageViewController : UIPageViewController, UIPageViewC
     private var courseOutlineMode: CourseOutlineMode
     weak var navigationDelegate : CourseContentPageViewControllerDelegate?
     
+    var castButton: GCKUICastButton = GCKUICastButton()
+
     ///Manages the caching of the viewControllers that have been viewed atleast once.
     ///Removes the ViewControllers from memory in case of a memory warning
     private let cacheManager : BlockViewControllerCacheManager
@@ -109,6 +112,12 @@ public class CourseContentPageViewController : UIPageViewController, UIPageViewC
             scrollView.delaysContentTouches = false
         }
         addObservers()
+    }
+    
+    public override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        addCastButtonToNavigationBar()
     }
     
     private func addStreamListeners() {
@@ -199,6 +208,10 @@ public class CourseContentPageViewController : UIPageViewController, UIPageViewC
         barButtonItem.isEnabled = enabled
         view.button.isEnabled = enabled
         return barButtonItem
+    }
+    
+    func addCastButtonToNavigationBar() {
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: castButton)
     }
     
     private func updateNavigationBars() {

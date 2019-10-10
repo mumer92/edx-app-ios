@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import GoogleCast
 
 class CourseDashboardViewController: UITabBarController, UITabBarControllerDelegate, InterfaceOrientationOverriding {
     
@@ -85,6 +86,11 @@ class CourseDashboardViewController: UITabBarController, UITabBarControllerDeleg
         if let controller = selectedViewController as? CourseOutlineViewController, controller.courseOutlineMode == .full {
             navigationItems.append(progressController.navigationItem())
         }
+        let castButton = GCKUICastButton(frame: CGRect(x: 0, y: 0, width: 24, height: 24))
+        castButton.tintColor = UIColor.gray
+        let castButtonItem =  UIBarButtonItem(customView: castButton)
+        navigationItems.append(castButtonItem)
+        
         navigationItem.rightBarButtonItems = navigationItems
     }
     

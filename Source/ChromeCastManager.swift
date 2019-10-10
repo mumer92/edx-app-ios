@@ -19,11 +19,27 @@ enum ChromeCastSessionStatus {
     case connected
 }
 
-typealias CastItemCompletion = (Bool) -> Void
-var status = ChromeCastSessionStatus.initial
+protocol CastManagerAvailableDeviceDelegate: class {
+    func reloadAvailableDeviceData()
+}
+
+protocol CastManagerSeekLocalPlayerDelegate: class {
+    func seekLocalPlayer(to time: TimeInterval)
+}
+
+protocol CastManagerUpdateMediaStatusDelegate: class {
+    func updateMediaStatus(mediaInfo: GCKMediaInformation?)
+}
 
 class ChromeCastManager: NSObject {
     static let shared = ChromeCastManager()
+
+    typealias CastItemCompletion = (Bool) -> Void
+    typealias ChromeCastSessionCompletion = (ChromeCastSessionStatus) -> Void
+
+    weak var availableDeviceDelegate: CastManagerAvailableDeviceDelegate?
+    weak var seekLocalPlayerDelegate: CastManagerSeekLocalPlayerDelegate?
+    weak var updateMediaStatusDelegate: CastManagerUpdateMediaStatusDelegate?
     
     private let castContext = GCKCastContext.sharedInstance()
     
@@ -31,10 +47,21 @@ class ChromeCastManager: NSObject {
     private let castReceiverAppID = kGCKDefaultMediaReceiverApplicationID
     private let castDebugLoggingEnabled = true
     
-    private var status = ChromeCastSessionStatus.initial
+    var discoveryManager: GCKDiscoveryManager!
+    private var availableDevices = [GCKDevice]()
+    var deviceCategory = String()
+    
+    private var chormeCastsessionStatusListener: ChromeCastSessionCompletion?
+    var chromeCastsessionStatus: ChromeCastSessionStatus! {
+        didSet {
+            chormeCastsessionStatusListener?(chromeCastsessionStatus)
+        }
+    }
+    
     private var castSessionManager: GCKSessionManager!
     var castDiscoveryManager: GCKDiscoveryManager!
-    
+    private var mediaInformation: GCKMediaInformation?
+
     var isconnectedToChromeCast: Bool {
         return castSessionManager.hasConnectedSession()
     }
@@ -46,9 +73,17 @@ class ChromeCastManager: NSObject {
     
     func initialize() {
         createCastContext()
+        initializeDiscovery()
         createCastSessionManager()
         createDiscoveryManager()
         createRemoteMediaListnerManager()
+    }
+    
+    private func initializeDiscovery() {
+        discoveryManager = GCKCastContext.sharedInstance().discoveryManager
+        discoveryManager.add(self)
+        discoveryManager.passiveScan = true
+        discoveryManager.startDiscovery()
     }
     
     private func createCastContext() {
@@ -73,6 +108,24 @@ class ChromeCastManager: NSObject {
     private func createRemoteMediaListnerManager() {
         guard let currenctSession = castSessionManager.currentCastSession else { return }
         currenctSession.remoteMediaClient?.add(self)
+    }
+    
+    private func addChromeCastMediaListener() {
+        guard let currentSession = castSessionManager.currentCastSession else {
+            return
+        }
+        currentSession.remoteMediaClient?.add(self)
+    }
+    
+    private func removeChromeCastMediaListener() {
+        guard let currentSession = castSessionManager.currentCastSession else {
+            return
+        }
+        currentSession.remoteMediaClient?.remove(self)
+    }
+    
+    func addChromeCastSessionStatusListener(listener: @escaping ChromeCastSessionCompletion) {
+        self.chormeCastsessionStatusListener = listener
     }
     
     func buildMediaInformation(contentID: String, title: String, description: String, studio: String, duration: TimeInterval, streamType: GCKMediaStreamType, thumbnailUrl: String?, customData: Any?) -> GCKMediaInformation {
@@ -118,7 +171,7 @@ class ChromeCastManager: NSObject {
         mediaSeekOptions.playPosition = time
         currentCastSession.remoteMediaClient?.loadMedia(mediaInfo, with: mediaSeekOptions)
         
-        status = .connected
+        chromeCastsessionStatus = .connected
         
         completion(true)
     }
@@ -185,6 +238,18 @@ class ChromeCastManager: NSObject {
         }
     }
     
+    func getAvailableDevices() -> [GCKDevice] {
+        return availableDevices
+    }
+    
+    func getMediaInfo() -> GCKMediaInformation? {
+        return mediaInformation
+    }
+    
+    func setMediaInfo(with mediaInfo: GCKMediaInformation?) {
+        self.mediaInformation = mediaInfo
+    }
+    
     func createMiniMediaControl() {
         let castContext = GCKCastContext.sharedInstance()
         let miniMediaControlsViewController = castContext.createMiniMediaControlsViewController()
@@ -204,7 +269,8 @@ extension ChromeCastManager: GCKSessionManagerListener {
     
     func sessionManager(_ sessionManager: GCKSessionManager, didStart session: GCKSession) {
         print("did start session manager")
-        status = .started
+        chromeCastsessionStatus = .started
+        addChromeCastMediaListener()
     }
     
     func sessionManager(_ sessionManager: GCKSessionManager, willEnd session: GCKSession) {
@@ -217,7 +283,7 @@ extension ChromeCastManager: GCKSessionManagerListener {
     
     func sessionManager(_ sessionManager: GCKSessionManager, didResumeSession session: GCKSession) {
         print("did resume session manager")
-        status = .resumed
+        chromeCastsessionStatus = .resumed
     }
     
     func sessionManager(_ sessionManager: GCKSessionManager, willEnd session: GCKCastSession) {
@@ -226,21 +292,37 @@ extension ChromeCastManager: GCKSessionManagerListener {
     
     func sessionManager(_ sessionManager: GCKSessionManager, didEnd session: GCKSession, withError error: Error?) {
         print("did end session manager")
-        status = .ended
+        chromeCastsessionStatus = .ended
     }
     
     func sessionManager(_ sessionManager: GCKSessionManager, didFailToStart session: GCKSession, withError error: Error) {
         print("did fail to start session manager")
-        status = .failed(error)
+        chromeCastsessionStatus = .failed(error)
     }
     
     func sessionManager(_ sessionManager: GCKSessionManager, didSuspend session: GCKSession, with reason: GCKConnectionSuspendReason) {
         print("did suspend session manager")
-        status = .suspended
+        chromeCastsessionStatus = .suspended
     }
     
 }
 
+extension ChromeCastManager {
+    func connectToDevice(device: GCKDevice) {
+        if discoveryManager.deviceCount == 0 && isconnectedToChromeCast {
+            return
+        }
+        
+        castSessionManager.startSession(with: device)
+    }
+    
+    func disconnectFromCurrentDevice() {
+        if castSessionManager.hasConnectedCastSession() {
+            removeChromeCastMediaListener()
+            castSessionManager.endSession()
+        }
+    }
+}
 
 extension ChromeCastManager: GCKDiscoveryManagerListener {
     func didStartDiscovery(forDeviceCategory deviceCategory: String) {
@@ -254,7 +336,8 @@ extension ChromeCastManager: GCKRemoteMediaClientListener {
     }
     
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didUpdate mediaStatus: GCKMediaStatus?) {
-        
+        updateMediaStatusDelegate?.updateMediaStatus(mediaInfo: mediaStatus?.mediaInformation)
+        setMediaInfo(with: mediaStatus?.mediaInformation)
     }
     
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didUpdate mediaMetadata: GCKMediaMetadata?) {

@@ -15,8 +15,11 @@ private enum PlayerState {
     case playing,
          paused,
          stop,
+         resume,
+         ended,
          chromeCastConnected,
-         playingOnChromeCast
+         playingOnChromeCast,
+         pausedOnChromeCast
 }
 
 private let currentItemStatusKey = "currentItem.status"
@@ -140,8 +143,7 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         return view
     }()
     
-    private let castManager = ChromeCastManager.shared
-    private let videoURL = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+    fileprivate let castManager = ChromeCastManager.shared
 
     init(environment : Environment) {
         self.environment = environment
@@ -159,6 +161,7 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         view.backgroundColor = .black
         loadingIndicatorView.hidesWhenStopped = true
         createControls()
+        listenForCastConnection()
     }
     
     func checkIfChromecastIsConnected() {
@@ -187,13 +190,31 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         //guard let currentItem = player.currentItem else { return }
         let duration = 0.0
         
-        let castMediaInfo = castManager.buildMediaInformation(contentID: url.absoluteString, title: video.summary?.name ?? "", description: "", studio: "", duration: duration, streamType: GCKMediaStreamType.buffered, thumbnailUrl: nil, customData: nil)
+        let castMediaInfo = castManager.buildMediaInformation(contentID: url.absoluteString, title: video.summary?.name ?? "", description: "", studio: "", duration: duration, streamType: GCKMediaStreamType.buffered, thumbnailUrl: video.summary?.videoThumbnailURL, customData: nil)
         
         castManager.startPlayingItemOnChromeCast(mediaInfo: castMediaInfo, at: 0) { done in
             if done {
                 print("done")
             } else {
                 print("something whent wrong")
+            }
+        }
+    }
+    
+    private func pauseCastPlay() {
+        playerState = .pausedOnChromeCast
+        castManager.pauseItemOnChromeCast(at: nil) { (done) in
+            if !done {
+                self.playerState = .paused
+            }
+        }
+    }
+    
+    private func continueCastPlay() {
+        playerState = .playingOnChromeCast
+        castManager.playItemOnChromeCast(to: nil) { (done) in
+            if !done {
+                self.playerState = .paused
             }
         }
     }
@@ -726,6 +747,30 @@ extension VideoPlayer {
             movieBackgroundView.frame = movieBackgroundFrame
             view.frame = movieFrame
         }
+    }
+}
+
+extension VideoPlayer {
+    private func listenForCastConnection() {
+        let sessionStatusListener: (ChromeCastSessionStatus) -> Void = { status in
+            switch status {
+            case .started:
+                self.playRemotely(video: self.video!)
+                self.player.pause()
+            case .resumed:
+                self.continueCastPlay()
+                self.player.pause()
+            case .ended, .failed:
+                if self.playerState == .playingOnChromeCast {
+                    self.playerState = .paused
+                } else if self.playerState == .pausedOnChromeCast {
+                    self.playerState = .playing
+                }
+            default: break
+            }
+        }
+        
+        castManager.addChromeCastSessionStatusListener(listener: sessionStatusListener)
     }
 }
 

@@ -9,6 +9,7 @@
 import Foundation
 import MediaPlayer
 import UIKit
+import GoogleCast
 
 class VideoBlockViewController : UIViewController, CourseBlockViewController, StatusBarOverriding, InterfaceOrientationOverriding, VideoTranscriptDelegate, RatingViewControllerDelegate, VideoPlayerDelegate {
     
@@ -26,6 +27,10 @@ class VideoBlockViewController : UIViewController, CourseBlockViewController, St
     private var VOEnabledOnScreen = false
     var currentVideo : OEXHelperVideoDownload?
     var rotateDeviceMessageView : IconMessageView?
+    
+    private var mediaControlsContainerView: UIView!
+    private var miniMediaControlsHeightConstraint: NSLayoutConstraint!
+    private var miniMediaControlsViewController: GCKUIMiniMediaControlsViewController!
     
     init(environment : Environment, blockID : CourseBlockID?, courseID: String) {
         self.blockID = blockID
@@ -133,11 +138,75 @@ class VideoBlockViewController : UIViewController, CourseBlockViewController, St
                 return
             }
         }
+        
+        createContainer()
+        createMiniMediaControl()
+                
+        if mediaControlsContainerView != nil {
+            updateControlBarsVisibility()
+        }
     }
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         subtitleTimer.invalidate()
+    }
+    
+    
+    private func createContainer() {
+        mediaControlsContainerView = UIView(frame: CGRect(x: 0, y: view.frame.maxY, width: view.frame.width, height: 0))
+        mediaControlsContainerView.accessibilityIdentifier = "mediaControlsContainerView"
+        
+        view.addSubview(mediaControlsContainerView)
+        
+        mediaControlsContainerView.snp.makeConstraints { make in
+            make.bottom.equalTo(view.snp.bottom).offset(-40)
+            make.leading.equalTo(view)
+            make.trailing.equalTo(view)
+            make.height.equalTo(mediaControlsContainerView)
+        }
+        miniMediaControlsHeightConstraint = mediaControlsContainerView.heightAnchor.constraint(equalToConstant: 0)
+        miniMediaControlsHeightConstraint.isActive = true
+    }
+    
+    private func createMiniMediaControl() {
+        let castContext = GCKCastContext.sharedInstance()
+        miniMediaControlsViewController = castContext.createMiniMediaControlsViewController()
+        miniMediaControlsViewController.delegate = self
+        mediaControlsContainerView.alpha = 0
+        miniMediaControlsViewController.view.alpha = 0
+        miniMediaControlsHeightConstraint.constant = miniMediaControlsViewController.minHeight
+        
+        addViewController(miniMediaControlsViewController, in: mediaControlsContainerView)
+        
+        updateControlBarsVisibility()
+    }
+    
+    private func addViewController(_ viewController: UIViewController?, in containerView: UIView) {
+        if let viewController = viewController {
+            viewController.view.isHidden = true
+            addChild(viewController)
+            viewController.view.frame = containerView.bounds
+            containerView.addSubview(viewController.view)
+            viewController.didMove(toParent: self)
+            viewController.view.isHidden = false
+        }
+    }
+    
+    fileprivate func updateControlBarsVisibility() {
+        if miniMediaControlsViewController.active {
+            miniMediaControlsHeightConstraint.constant = miniMediaControlsViewController.minHeight
+            view.bringSubviewToFront(mediaControlsContainerView)
+        } else {
+            miniMediaControlsHeightConstraint.constant = 0
+        }
+        
+        UIView.animate(withDuration: 0.3, animations: {
+            self.view.layoutIfNeeded()
+        }) { _ in
+            self.mediaControlsContainerView.alpha = 1
+            self.miniMediaControlsViewController.view.alpha = 1
+        }
     }
     
     func setAccessibility() {
@@ -400,3 +469,10 @@ extension VideoBlockViewController {
         environment.networkManager.taskForRequest(networkRequest) { _ in }
     }
 }
+
+extension VideoBlockViewController: GCKUIMiniMediaControlsViewControllerDelegate {
+    public func miniMediaControlsViewController(_ miniMediaControlsViewController: GCKUIMiniMediaControlsViewController, shouldAppear: Bool) {
+        updateControlBarsVisibility()
+    }
+}
+

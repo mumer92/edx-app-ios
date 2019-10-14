@@ -28,10 +28,6 @@ class VideoBlockViewController : UIViewController, CourseBlockViewController, St
     var currentVideo : OEXHelperVideoDownload?
     var rotateDeviceMessageView : IconMessageView?
     
-    private var mediaControlsContainerView: UIView!
-    private var miniMediaControlsHeightConstraint: NSLayoutConstraint!
-    private var miniMediaControlsViewController: GCKUIMiniMediaControlsViewController!
-    
     init(environment : Environment, blockID : CourseBlockID?, courseID: String) {
         self.blockID = blockID
         self.environment = environment
@@ -118,6 +114,8 @@ class VideoBlockViewController : UIViewController, CourseBlockViewController, St
         NotificationCenter.default.oex_addObserver(observer: self, name: UIAccessibilityVoiceOverStatusChanged) { (_, observer, _) in
             observer.setAccessibility()
         }
+        
+        loadVideoIfNecessary()
     }
     
     override func viewDidAppear(_ animated : Bool) {
@@ -129,8 +127,6 @@ class VideoBlockViewController : UIViewController, CourseBlockViewController, St
         view.setNeedsLayout()
         view.layoutIfNeeded()
         super.viewDidAppear(animated)
-
-        loadVideoIfNecessary()
         
         if !(environment.interface?.canDownload() ?? false) {
             guard let video = environment.interface?.stateForVideo(withID: blockID, courseID : courseID), video.downloadState == .complete else {
@@ -138,75 +134,11 @@ class VideoBlockViewController : UIViewController, CourseBlockViewController, St
                 return
             }
         }
-        
-        createContainer()
-        createMiniMediaControl()
-                
-        if mediaControlsContainerView != nil {
-            updateControlBarsVisibility()
-        }
     }
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         subtitleTimer.invalidate()
-    }
-    
-    
-    private func createContainer() {
-        mediaControlsContainerView = UIView(frame: CGRect(x: 0, y: view.frame.maxY, width: view.frame.width, height: 0))
-        mediaControlsContainerView.accessibilityIdentifier = "mediaControlsContainerView"
-        
-        view.addSubview(mediaControlsContainerView)
-        
-        mediaControlsContainerView.snp.makeConstraints { make in
-            make.bottom.equalTo(view.snp.bottom).offset(-40)
-            make.leading.equalTo(view)
-            make.trailing.equalTo(view)
-            make.height.equalTo(mediaControlsContainerView)
-        }
-        miniMediaControlsHeightConstraint = mediaControlsContainerView.heightAnchor.constraint(equalToConstant: 0)
-        miniMediaControlsHeightConstraint.isActive = true
-    }
-    
-    private func createMiniMediaControl() {
-        let castContext = GCKCastContext.sharedInstance()
-        miniMediaControlsViewController = castContext.createMiniMediaControlsViewController()
-        miniMediaControlsViewController.delegate = self
-        mediaControlsContainerView.alpha = 0
-        miniMediaControlsViewController.view.alpha = 0
-        miniMediaControlsHeightConstraint.constant = miniMediaControlsViewController.minHeight
-        
-        addViewController(miniMediaControlsViewController, in: mediaControlsContainerView)
-        
-        updateControlBarsVisibility()
-    }
-    
-    private func addViewController(_ viewController: UIViewController?, in containerView: UIView) {
-        if let viewController = viewController {
-            viewController.view.isHidden = true
-            addChild(viewController)
-            viewController.view.frame = containerView.bounds
-            containerView.addSubview(viewController.view)
-            viewController.didMove(toParent: self)
-            viewController.view.isHidden = false
-        }
-    }
-    
-    fileprivate func updateControlBarsVisibility() {
-        if miniMediaControlsViewController.active {
-            miniMediaControlsHeightConstraint.constant = miniMediaControlsViewController.minHeight
-            view.bringSubviewToFront(mediaControlsContainerView)
-        } else {
-            miniMediaControlsHeightConstraint.constant = 0
-        }
-        
-        UIView.animate(withDuration: 0.3, animations: {
-            self.view.layoutIfNeeded()
-        }) { _ in
-            self.mediaControlsContainerView.alpha = 1
-            self.miniMediaControlsViewController.view.alpha = 1
-        }
     }
     
     func setAccessibility() {
@@ -467,12 +399,6 @@ extension VideoBlockViewController {
         guard let username = environment.session.currentUser?.username, let blockID = blockID else { return }
         let networkRequest = VideoCompletionApi.videoCompletion(username: username, courseID: courseID, blockID: blockID)
         environment.networkManager.taskForRequest(networkRequest) { _ in }
-    }
-}
-
-extension VideoBlockViewController: GCKUIMiniMediaControlsViewControllerDelegate {
-    public func miniMediaControlsViewController(_ miniMediaControlsViewController: GCKUIMiniMediaControlsViewController, shouldAppear: Bool) {
-        updateControlBarsVisibility()
     }
 }
 

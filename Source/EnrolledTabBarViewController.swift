@@ -184,7 +184,7 @@ class EnrolledTabBarViewController: UITabBarController, UITabBarControllerDelega
         accountButton.accessibilityIdentifier = "EnrolledTabBarViewController:account-button"
         
         let castButton = GCKUICastButton(frame: CGRect(x: 0, y: 0, width: 24, height: 24))
-        castButton.tintColor = UIColor.gray
+        castButton.tintColor = OEXStyles.shared().primaryBaseColor()
         navigationItem.rightBarButtonItems = [accountButton, UIBarButtonItem(customView: castButton)]
         
         accountButton.oex_setAction { [weak self] in

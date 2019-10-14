@@ -46,7 +46,11 @@ public class CourseContentPageViewController : UIPageViewController, UIPageViewC
     private var courseOutlineMode: CourseOutlineMode
     weak var navigationDelegate : CourseContentPageViewControllerDelegate?
     
-    var castButton: GCKUICastButton = GCKUICastButton()
+    lazy var castButton: GCKUICastButton = {
+        let button = GCKUICastButton()
+        button.tintColor = OEXStyles.shared().primaryBaseColor()
+        return button
+    }()
 
     ///Manages the caching of the viewControllers that have been viewed atleast once.
     ///Removes the ViewControllers from memory in case of a memory warning

@@ -60,6 +60,10 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
     private let preferredTimescale:Int32 = 100
     fileprivate var fullScreenContainerView: UIView?
     
+    private var mediaControlsContainerView: UIView!
+    private var miniMediaControlsHeightConstraint: NSLayoutConstraint!
+    private var miniMediaControlsViewController: GCKUIMiniMediaControlsViewController!
+    
     // UIPageViewController keep multiple viewControllers simultanously for smooth switching
     // on view transitioning this method calls for every viewController which cause framing issue for fullscreen mode
     // as we are using rootViewController of keyWindow for fullscreen mode.
@@ -160,8 +164,14 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         createPlayer()
         view.backgroundColor = .black
         loadingIndicatorView.hidesWhenStopped = true
-        createControls()
         listenForCastConnection()
+        
+        createContainer()
+        createMiniMediaControl()
+        
+        if mediaControlsContainerView != nil {
+            updateControlBarsVisibility()
+        }
     }
     
     func checkIfChromecastIsConnected() {
@@ -176,23 +186,23 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         }
         
         self.video = video
-        controls?.video = video
+
         let fileManager = FileManager.default
         let path = "\(video.filePath).mp4"
         let fileExists : Bool = fileManager.fileExists(atPath: path)
         if fileExists {
             url = URL(fileURLWithPath: path)
         }
-        else if video.downloadState == .complete {
-            playerDelegate?.playerDidFailedPlaying(videoPlayer: self, errorMessage: Strings.videoContentNotAvailable)
+        
+        var elapsedtime = 0.0
+        
+        if let video = self.video {
+            elapsedtime = Double(environment.interface?.lastPlayedInterval(forVideo: video) ?? Float(lastElapsedTime))
         }
-                
-        //guard let currentItem = player.currentItem else { return }
-        let duration = 0.0
+       
+        let castMediaInfo = castManager.buildMediaInformation(contentID: url.absoluteString, title: video.summary?.name ?? "", description: "", studio: "", duration: 0, streamType: GCKMediaStreamType.buffered, thumbnailUrl: video.summary?.videoThumbnailURL, customData: nil)
         
-        let castMediaInfo = castManager.buildMediaInformation(contentID: url.absoluteString, title: video.summary?.name ?? "", description: "", studio: "", duration: duration, streamType: GCKMediaStreamType.buffered, thumbnailUrl: video.summary?.videoThumbnailURL, customData: nil)
-        
-        castManager.startPlayingItemOnChromeCast(mediaInfo: castMediaInfo, at: 0) { done in
+        castManager.startPlayingItemOnChromeCast(mediaInfo: castMediaInfo, at: elapsedtime) { done in
             if done {
                 print("done")
             } else {
@@ -286,10 +296,17 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         controls = VideoPlayerControls(environment: environment, player: self)
         controls?.delegate = self
         if let controls = controls {
+            controls.tag = 100
             playerView.addSubview(controls)
         }
         controls?.snp.makeConstraints() { make in
             make.edges.equalTo(playerView)
+        }
+    }
+    
+    private func removeControls() {
+        if let view = self.view.viewWithTag(100) {
+            view.removeFromSuperview()
         }
     }
     
@@ -371,11 +388,12 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         if castManager.isconnectedToChromeCast {
             playRemotely(video: video)
         } else {
+            createControls()
             playLocally(video: video)
         }
     }
     
-    private func playLocally(video: OEXHelperVideoDownload) {
+    private func playLocally(video: OEXHelperVideoDownload, at timeInterval: Double = 0.0) {
         guard let videoURL = video.summary?.videoURL, var url = URL(string: videoURL) else {
             return
         }
@@ -394,7 +412,7 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         player.replaceCurrentItem(with: playerItem)
         loadingIndicatorView.startAnimating()
         addObservers()
-        let timeInterval = TimeInterval(environment.interface?.lastPlayedInterval(forVideo: video) ?? 0)
+        //let timeInterval = TimeInterval(environment.interface?.lastPlayedInterval(forVideo: video) ?? 0)
         play(at: timeInterval)
         controls?.isTapButtonHidden = true
         NotificationCenter.default.oex_addObserver(observer: self, name: NSNotification.Name.AVPlayerItemDidPlayToEndTime.rawValue, object: player.currentItem as Any) {(notification, observer, _) in
@@ -753,24 +771,101 @@ extension VideoPlayer {
 extension VideoPlayer {
     private func listenForCastConnection() {
         let sessionStatusListener: (ChromeCastSessionStatus) -> Void = { status in
+            print("status: \(status)")
             switch status {
             case .started:
+                self.stop()
+                self.removeControls()
                 self.playRemotely(video: self.video!)
-                self.player.pause()
             case .resumed:
+                self.stop()
+                self.removeControls()
                 self.continueCastPlay()
-                self.player.pause()
             case .ended, .failed:
                 if self.playerState == .playingOnChromeCast {
                     self.playerState = .paused
-                } else if self.playerState == .pausedOnChromeCast {
+                } else {
                     self.playerState = .playing
+                    self.createControls()
+                    self.castManager.getPlayBackTimeFromChromeCast { timeInterval in
+                        self.playLocally(video: self.video!, at: timeInterval ?? 0.0)
+                    }
                 }
             default: break
             }
         }
         
         castManager.addChromeCastSessionStatusListener(listener: sessionStatusListener)
+    }
+}
+
+extension VideoPlayer: GCKUIMiniMediaControlsViewControllerDelegate {
+    public func miniMediaControlsViewController(_ miniMediaControlsViewController: GCKUIMiniMediaControlsViewController, shouldAppear: Bool) {
+        updateControlBarsVisibility()
+    }
+}
+
+extension VideoPlayer {
+    fileprivate func updateControlBarsVisibility() {
+        guard let parent = self.parent?.parent as? CourseContentPageViewController else { return }
+
+        if miniMediaControlsViewController.active {
+            miniMediaControlsHeightConstraint.constant = miniMediaControlsViewController.minHeight
+            parent.view.bringSubviewToFront(mediaControlsContainerView)
+        } else {
+            miniMediaControlsHeightConstraint.constant = 0
+        }
+        
+        UIView.animate(withDuration: 0.3, animations: {
+            parent.view.layoutIfNeeded()
+        }) { _ in
+            self.mediaControlsContainerView.alpha = 1
+            self.miniMediaControlsViewController.view.alpha = 1
+        }
+    }
+    
+    private func createContainer() {
+        guard let parent = self.parent?.parent as? CourseContentPageViewController else { return }
+
+        mediaControlsContainerView = UIView(frame: CGRect(x: 0, y: view.frame.maxY, width: view.frame.width, height: 0))
+        mediaControlsContainerView.accessibilityIdentifier = "mediaControlsContainerView"
+        
+        parent.view.addSubview(mediaControlsContainerView)
+        
+        mediaControlsContainerView.snp.makeConstraints { make in
+            make.bottom.equalTo(parent.view.snp.bottom).offset(-1 * (parent.navigationController?.toolbar.frame.size.height ?? -100))
+            make.leading.equalTo(parent.view)
+            make.trailing.equalTo(parent.view)
+            make.height.equalTo(mediaControlsContainerView)
+        }
+        miniMediaControlsHeightConstraint = mediaControlsContainerView.heightAnchor.constraint(equalToConstant: 0)
+        miniMediaControlsHeightConstraint.isActive = true
+    }
+    
+    private func createMiniMediaControl() {
+        let castContext = GCKCastContext.sharedInstance()
+        miniMediaControlsViewController = castContext.createMiniMediaControlsViewController()
+        miniMediaControlsViewController.delegate = self
+        mediaControlsContainerView.alpha = 0
+        miniMediaControlsViewController.view.alpha = 0
+        miniMediaControlsHeightConstraint.constant = miniMediaControlsViewController.minHeight
+        
+        addViewController(miniMediaControlsViewController, in: mediaControlsContainerView)
+        
+        updateControlBarsVisibility()
+    }
+    
+    private func addViewController(_ viewController: UIViewController?, in containerView: UIView) {
+        guard let parent = self.parent?.parent as? CourseContentPageViewController else { return }
+
+        if let viewController = viewController {
+            viewController.view.isHidden = true
+            parent.addChild(viewController)
+            viewController.view.frame = containerView.bounds
+            containerView.addSubview(viewController.view)
+            viewController.didMove(toParent: self)
+            viewController.view.isHidden = false
+        }
     }
 }
 

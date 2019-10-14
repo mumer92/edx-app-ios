@@ -87,7 +87,7 @@ static const BOOL kDebugLoggingEnabled = YES;
     GCKDiscoveryCriteria *criteria = [[GCKDiscoveryCriteria alloc] initWithApplicationID: kGCKDefaultMediaReceiverApplicationID];
     GCKCastOptions *options = [[GCKCastOptions alloc] initWithDiscoveryCriteria:criteria];
     [GCKCastContext setSharedInstanceWithOptions:options];
-    
+
     // Enable logger.
     [GCKLogger sharedInstance].delegate = self;
     
@@ -231,10 +231,10 @@ static const BOOL kDebugLoggingEnabled = YES;
     }
 
     //Initialize Fabric
-    OEXFabricConfig* fabric = [config fabricConfig];
-    if(fabric.appKey && fabric.isEnabled) {
-        [Fabric with:@[CrashlyticsKit]];
-    }
+//    OEXFabricConfig* fabric = [config fabricConfig];
+//    if(fabric.appKey && fabric.isEnabled) {
+//        [Fabric with:@[CrashlyticsKit]];
+//    }
 }
 
 - (void) configureFabricKits:(NSDictionary*) launchOptions {

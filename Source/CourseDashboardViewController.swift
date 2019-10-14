@@ -87,7 +87,7 @@ class CourseDashboardViewController: UITabBarController, UITabBarControllerDeleg
             navigationItems.append(progressController.navigationItem())
         }
         let castButton = GCKUICastButton(frame: CGRect(x: 0, y: 0, width: 24, height: 24))
-        castButton.tintColor = UIColor.gray
+        castButton.tintColor = OEXStyles.shared().primaryBaseColor()
         let castButtonItem =  UIBarButtonItem(customView: castButton)
         navigationItems.append(castButtonItem)
         

@@ -36,7 +36,7 @@ protocol VideoPlayerDelegate: class {
 private var playbackLikelyToKeepUpContext = 0
 class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManagerDelegate {
     
-    typealias Environment = OEXInterfaceProvider & OEXAnalyticsProvider & OEXStylesProvider
+    typealias Environment = OEXInterfaceProvider & OEXAnalyticsProvider & OEXStylesProvider & NetworkManagerProvider
     
     private let environment : Environment
     fileprivate var controls: VideoPlayerControls?
@@ -186,7 +186,7 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         }
         
         self.video = video
-
+        
         let fileManager = FileManager.default
         let path = "\(video.filePath).mp4"
         let fileExists : Bool = fileManager.fileExists(atPath: path)
@@ -199,8 +199,23 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         if let video = self.video {
             elapsedtime = Double(environment.interface?.lastPlayedInterval(forVideo: video) ?? Float(lastElapsedTime))
         }
-       
-        let castMediaInfo = castManager.buildMediaInformation(contentID: url.absoluteString, title: video.summary?.name ?? "", description: "", studio: "", duration: 0, streamType: GCKMediaStreamType.buffered, thumbnailUrl: video.summary?.videoThumbnailURL, customData: nil)
+        
+        var courseImageURL = video.summary?.videoThumbnailURL
+        if let courseID = video.course_id,
+            let course = environment.interface?.enrollmentForCourse(withID: courseID)?.course {
+            courseImageURL = course.courseImageURL
+        }
+        
+        var thumbnail = self.video?.summary?.videoThumbnailURL
+
+        if thumbnail != nil {
+            if let relativeImageURL = courseImageURL,
+                let imageURL = URL(string: relativeImageURL, relativeTo: self.environment.networkManager.baseURL) {
+                thumbnail = imageURL.absoluteString
+            }
+        }
+        
+        let castMediaInfo = castManager.buildMediaInformation(contentID: url.absoluteString, title: video.summary?.name ?? "", description: "", studio: "", duration: 0, streamType: GCKMediaStreamType.buffered, thumbnailUrl: thumbnail, customData: nil)
         
         castManager.startPlayingItemOnChromeCast(mediaInfo: castMediaInfo, at: elapsedtime) { done in
             if done {

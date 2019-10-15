@@ -9,7 +9,7 @@
 import UIKit
 import GoogleCast
 
-class CourseDashboardViewController: UITabBarController, UITabBarControllerDelegate, InterfaceOrientationOverriding {
+class CourseDashboardViewController: UITabBarController, UITabBarControllerDelegate, InterfaceOrientationOverriding, CastButtonDelegate {
     
      typealias Environment = OEXAnalyticsProvider & OEXConfigProvider & DataManagerProvider & NetworkManagerProvider & OEXRouterProvider & OEXInterfaceProvider & ReachabilityProvider & OEXSessionProvider & OEXStylesProvider
     
@@ -86,9 +86,7 @@ class CourseDashboardViewController: UITabBarController, UITabBarControllerDeleg
         if let controller = selectedViewController as? CourseOutlineViewController, controller.courseOutlineMode == .full {
             navigationItems.append(progressController.navigationItem())
         }
-        let castButton = GCKUICastButton(frame: CGRect(x: 0, y: 0, width: 24, height: 24))
-        castButton.tintColor = OEXStyles.shared().primaryBaseColor()
-        let castButtonItem =  UIBarButtonItem(customView: castButton)
+        
         navigationItems.append(castButtonItem)
         
         navigationItem.rightBarButtonItems = navigationItems

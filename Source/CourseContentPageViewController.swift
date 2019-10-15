@@ -45,12 +45,6 @@ public class CourseContentPageViewController : UIPageViewController, UIPageViewC
     private let courseQuerier : CourseOutlineQuerier
     private var courseOutlineMode: CourseOutlineMode
     weak var navigationDelegate : CourseContentPageViewControllerDelegate?
-    
-    lazy var castButton: GCKUICastButton = {
-        let button = GCKUICastButton()
-        button.tintColor = OEXStyles.shared().primaryBaseColor()
-        return button
-    }()
 
     ///Manages the caching of the viewControllers that have been viewed atleast once.
     ///Removes the ViewControllers from memory in case of a memory warning
@@ -215,7 +209,7 @@ public class CourseContentPageViewController : UIPageViewController, UIPageViewC
     }
     
     func addCastButtonToNavigationBar() {
-        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: castButton)
+        navigationItem.rightBarButtonItem = castButtonItem
     }
     
     private func updateNavigationBars() {

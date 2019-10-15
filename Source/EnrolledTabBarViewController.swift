@@ -27,7 +27,7 @@ private enum TabBarOptions: Int {
     }
 }
 
-class EnrolledTabBarViewController: UITabBarController, UITabBarControllerDelegate, InterfaceOrientationOverriding {
+class EnrolledTabBarViewController: UITabBarController, UITabBarControllerDelegate, InterfaceOrientationOverriding, CastButtonDelegate {
 
     typealias Environment = OEXAnalyticsProvider & OEXConfigProvider & DataManagerProvider & NetworkManagerProvider & OEXRouterProvider & OEXInterfaceProvider & ReachabilityProvider & OEXSessionProvider & OEXStylesProvider
     
@@ -183,9 +183,8 @@ class EnrolledTabBarViewController: UITabBarController, UITabBarControllerDelega
         accountButton.accessibilityLabel = Strings.userAccount
         accountButton.accessibilityIdentifier = "EnrolledTabBarViewController:account-button"
         
-        let castButton = GCKUICastButton(frame: CGRect(x: 0, y: 0, width: 24, height: 24))
-        castButton.tintColor = OEXStyles.shared().primaryBaseColor()
-        navigationItem.rightBarButtonItems = [accountButton, UIBarButtonItem(customView: castButton)]
+       
+        navigationItem.rightBarButtonItems = [accountButton, ]
         
         accountButton.oex_setAction { [weak self] in
             self?.environment.router?.showAccount(controller: self, modalTransitionStylePresent: true)

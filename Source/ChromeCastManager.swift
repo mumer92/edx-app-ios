@@ -9,14 +9,14 @@
 import Foundation
 import GoogleCast
 
-enum ChromeCastSessionStatus {
-    case initial
-    case started
-    case resumed
-    case suspended
-    case ended
-    case failed(Error)
-    case connected
+enum ChromeCastSessionStatus: String {
+    case initial = "initial"
+    case started = "started"
+    case resumed = "resumed"
+    case suspended = "suspended"
+    case ended = "ended"
+    case failed = "failed"
+    case connected = "connected"
 }
 
 protocol CastManagerAvailableDeviceDelegate: class {
@@ -52,7 +52,7 @@ class ChromeCastManager: NSObject {
     var deviceCategory = String()
     
     private var chormeCastsessionStatusListener: ChromeCastSessionCompletion?
-    var chromeCastsessionStatus: ChromeCastSessionStatus! {
+    var chromeCastsessionStatus: ChromeCastSessionStatus = .initial {
         didSet {
             chormeCastsessionStatusListener?(chromeCastsessionStatus)
         }
@@ -250,15 +250,9 @@ class ChromeCastManager: NSObject {
         self.mediaInformation = mediaInfo
     }
     
-    func createMiniMediaControl() {
+    func createMiniMediaControl() -> GCKUIMiniMediaControlsViewController{
         let castContext = GCKCastContext.sharedInstance()
-        let miniMediaControlsViewController = castContext.createMiniMediaControlsViewController()
-//        miniMediaControlsViewController.delegate = self
-//        mediaControlsContainerView.alpha = 0
-//        miniMediaControlsViewController.view.alpha = 0
-//        miniMediaControlsHeightConstraint.constant = miniMediaControlsViewController.minHeight
-//        installViewController(miniMediaControlsViewController, inContainerView: mediaControlsContainerView)
-//        updateControlBarsVisibility()
+        return castContext.createMiniMediaControlsViewController()
     }
 }
 
@@ -297,7 +291,7 @@ extension ChromeCastManager: GCKSessionManagerListener {
     
     func sessionManager(_ sessionManager: GCKSessionManager, didFailToStart session: GCKSession, withError error: Error) {
         print("did fail to start session manager")
-        chromeCastsessionStatus = .failed(error)
+        chromeCastsessionStatus = .failed
     }
     
     func sessionManager(_ sessionManager: GCKSessionManager, didSuspend session: GCKSession, with reason: GCKConnectionSuspendReason) {
@@ -362,3 +356,16 @@ extension ChromeCastManager: GCKLoggerDelegate {
     }
 }
 
+extension GCKUICastContainerViewController{
+    override open var shouldAutorotate: Bool {
+        return false
+    }
+    
+    override open var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        return .portrait
+    }
+    
+    override open var preferredInterfaceOrientationForPresentation:UIInterfaceOrientation {
+        return .portrait
+    }
+}

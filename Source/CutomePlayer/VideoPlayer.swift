@@ -34,7 +34,7 @@ protocol VideoPlayerDelegate: class {
 }
 
 private var playbackLikelyToKeepUpContext = 0
-class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManagerDelegate {
+class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManagerDelegate,InterfaceOrientationOverriding {
     
     typealias Environment = OEXInterfaceProvider & OEXAnalyticsProvider & OEXStylesProvider & NetworkManagerProvider
     
@@ -147,8 +147,16 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         return view
     }()
     
+    override var shouldAutorotate: Bool {
+        return false
+    }
+    
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        return .portrait
+    }
+    
     fileprivate let castManager = ChromeCastManager.shared
-
+    
     init(environment : Environment) {
         self.environment = environment
         
@@ -161,17 +169,9 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        createPlayer()
         view.backgroundColor = .black
         loadingIndicatorView.hidesWhenStopped = true
         listenForCastConnection()
-        
-        createContainer()
-        createMiniMediaControl()
-        
-        if mediaControlsContainerView != nil {
-            updateControlBarsVisibility()
-        }
     }
     
     func checkIfChromecastIsConnected() {
@@ -386,9 +386,15 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        createPlayer()
         isVisible = true
         applyScreenOrientation()
         checkIfChromecastIsConnected()
+        
+        if mediaControlsContainerView == nil {
+            createContainer()
+            createMiniMediaControl()
+        }
     }
     
     private func applyScreenOrientation() {
@@ -403,6 +409,7 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         if castManager.isconnectedToChromeCast {
             playRemotely(video: video)
         } else {
+            applyScreenOrientation()
             createControls()
             playLocally(video: video)
         }
@@ -539,6 +546,7 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         super.viewWillDisappear(animated)
         isVisible = false
         pause()
+        removeMiniMediaContainerView()
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -823,6 +831,11 @@ extension VideoPlayer: GCKUIMiniMediaControlsViewControllerDelegate {
 extension VideoPlayer {
     fileprivate func updateControlBarsVisibility() {
         guard let parent = self.parent?.parent as? CourseContentPageViewController else { return }
+        
+        if mediaControlsContainerView == nil {
+            createContainer()
+            createMiniMediaControl()
+        }
 
         if miniMediaControlsViewController.active {
             miniMediaControlsHeightConstraint.constant = miniMediaControlsViewController.minHeight
@@ -844,6 +857,7 @@ extension VideoPlayer {
 
         mediaControlsContainerView = UIView(frame: CGRect(x: 0, y: view.frame.maxY, width: view.frame.width, height: 0))
         mediaControlsContainerView.accessibilityIdentifier = "mediaControlsContainerView"
+        mediaControlsContainerView.tag = 300
         
         parent.view.addSubview(mediaControlsContainerView)
         
@@ -858,8 +872,7 @@ extension VideoPlayer {
     }
     
     private func createMiniMediaControl() {
-        let castContext = GCKCastContext.sharedInstance()
-        miniMediaControlsViewController = castContext.createMiniMediaControlsViewController()
+        miniMediaControlsViewController = castManager.createMiniMediaControl()
         miniMediaControlsViewController.delegate = self
         mediaControlsContainerView.alpha = 0
         miniMediaControlsViewController.view.alpha = 0
@@ -880,6 +893,20 @@ extension VideoPlayer {
             containerView.addSubview(viewController.view)
             viewController.didMove(toParent: self)
             viewController.view.isHidden = false
+        }
+    }
+    
+    private func removeMiniMediaContainerView() {
+        guard let parent = self.parent?.parent as? CourseContentPageViewController else { return }
+        if let viewWithTag = parent.view.viewWithTag(300) {
+            viewWithTag.removeFromSuperview()
+        }
+        if miniMediaControlsViewController != nil {
+            miniMediaControlsViewController.delegate = nil
+            miniMediaControlsViewController.willMove(toParent: nil)
+            miniMediaControlsViewController.removeFromParent()
+            miniMediaControlsViewController.view.removeFromSuperview()
+            mediaControlsContainerView = nil
         }
     }
 }

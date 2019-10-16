@@ -71,7 +71,7 @@ class EnrolledTabBarViewController: UITabBarController, UITabBarControllerDelega
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        addAccountButton()
+        addRightBarButtonItems()
     }
 
     override func didReceiveMemoryWarning() {
@@ -178,13 +178,13 @@ class EnrolledTabBarViewController: UITabBarController, UITabBarControllerDelega
         }
     }
     
-    private func addAccountButton() {
+    private func addRightBarButtonItems() {
         let accountButton = UIBarButtonItem(image: Icon.Account.imageWithFontSize(size: tabBarImageFontSize), style: .plain, target: nil, action: nil)
         accountButton.accessibilityLabel = Strings.userAccount
         accountButton.accessibilityIdentifier = "EnrolledTabBarViewController:account-button"
         
        
-        navigationItem.rightBarButtonItems = [accountButton, ]
+        navigationItem.rightBarButtonItems = [accountButton, castButtonItem]
         
         accountButton.oex_setAction { [weak self] in
             self?.environment.router?.showAccount(controller: self, modalTransitionStylePresent: true)

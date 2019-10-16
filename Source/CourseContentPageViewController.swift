@@ -370,14 +370,14 @@ public class CourseContentPageViewController : UIPageViewController, UIPageViewC
     }
     
     override public var shouldAutorotate: Bool {
-        if ChromeCastManager.shared.isconnectedToChromeCast {
+        if ChromeCastManager.shared.isMiniPlayerAdded {
             return false
         }
         return true
     }
     
     override public var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        if ChromeCastManager.shared.isconnectedToChromeCast {
+        if ChromeCastManager.shared.isMiniPlayerAdded {
             return .portrait
         }
         return [.portrait , .landscapeLeft , .landscapeRight]

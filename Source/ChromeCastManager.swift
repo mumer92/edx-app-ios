@@ -9,14 +9,20 @@
 import Foundation
 import GoogleCast
 
-enum ChromeCastSessionStatus: String {
-    case initial = "initial"
-    case started = "started"
-    case resumed = "resumed"
-    case suspended = "suspended"
-    case ended = "ended"
-    case failed = "failed"
-    case connected = "connected"
+enum ChromeCastSessionStatus {
+    case initial
+    case started
+    case resumed
+    case suspended
+    case ended
+    case failed(Error)
+    case connected
+    case buffering
+    case idle
+    case loading
+    case playing
+    case paused
+    case switchToLocalPlay
 }
 
 protocol CastManagerAvailableDeviceDelegate: class {
@@ -58,6 +64,14 @@ class ChromeCastManager: NSObject {
         }
     }
     
+    private var remoteMediaClient: GCKRemoteMediaClient? {
+        return castSessionManager.currentCastSession?.remoteMediaClient
+    }
+    
+    private var idleReason: GCKMediaPlayerIdleReason {
+        return remoteMediaClient?.mediaStatus?.idleReason ?? GCKMediaPlayerIdleReason.none
+    }
+    
     private var castSessionManager: GCKSessionManager!
     var castDiscoveryManager: GCKDiscoveryManager!
     private var mediaInformation: GCKMediaInformation?
@@ -65,6 +79,8 @@ class ChromeCastManager: NSObject {
     var isconnectedToChromeCast: Bool {
         return castSessionManager.hasConnectedSession()
     }
+    
+    var isMiniPlayerAdded = false
     
     private override init() {
         super.init()
@@ -258,44 +274,44 @@ class ChromeCastManager: NSObject {
 
 extension ChromeCastManager: GCKSessionManagerListener {
     func sessionManager(_ sessionManager: GCKSessionManager, willStart session: GCKSession) {
-        print("will start session manager")
+        print("Chromecast SessionManagerListener: will start session manager")
     }
     
     func sessionManager(_ sessionManager: GCKSessionManager, didStart session: GCKSession) {
-        print("did start session manager")
+        print("Chromecast SessionManagerListener: did start session manager")
         chromeCastsessionStatus = .started
         addChromeCastMediaListener()
     }
     
     func sessionManager(_ sessionManager: GCKSessionManager, willEnd session: GCKSession) {
-        print("will end session manager")
+        print("Chromecast SessionManagerListener: will end session manager")
     }
     
     func sessionManager(_ sessionManager: GCKSessionManager, willResumeSession session: GCKSession) {
-        print("will resume session manager")
+        print("Chromecast SessionManagerListener: will resume session manager")
     }
     
     func sessionManager(_ sessionManager: GCKSessionManager, didResumeSession session: GCKSession) {
-        print("did resume session manager")
+        print("Chromecast SessionManagerListener: did resume session manager")
         chromeCastsessionStatus = .resumed
     }
     
     func sessionManager(_ sessionManager: GCKSessionManager, willEnd session: GCKCastSession) {
-        print("will end session manager")
+        print("Chromecast SessionManagerListener: will end session manager")
     }
     
     func sessionManager(_ sessionManager: GCKSessionManager, didEnd session: GCKSession, withError error: Error?) {
-        print("did end session manager")
+        print("Chromecast SessionManagerListener: did end session manager \(String(describing: error))")
         chromeCastsessionStatus = .ended
     }
     
     func sessionManager(_ sessionManager: GCKSessionManager, didFailToStart session: GCKSession, withError error: Error) {
-        print("did fail to start session manager")
-        chromeCastsessionStatus = .failed
+        print("Chromecast SessionManagerListener: did fail to start session manager \(error)")
+        chromeCastsessionStatus = .failed(error)
     }
     
     func sessionManager(_ sessionManager: GCKSessionManager, didSuspend session: GCKSession, with reason: GCKConnectionSuspendReason) {
-        print("did suspend session manager")
+        print("Chromecast SessionManagerListener: did suspend session manager \(reason)")
         chromeCastsessionStatus = .suspended
     }
     
@@ -320,30 +336,67 @@ extension ChromeCastManager {
 
 extension ChromeCastManager: GCKDiscoveryManagerListener {
     func didStartDiscovery(forDeviceCategory deviceCategory: String) {
-        print("did start discovery")
+        print("Chromecast DiscoveryManagerListener: did start discovery")
     }
 }
 
 extension ChromeCastManager: GCKRemoteMediaClientListener {
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didStartMediaSessionWithID sessionID: Int) {
-        
+        print("Chromecast MediaClientListener: didStartMediaSessionWithID \(sessionID)")
+
     }
     
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didUpdate mediaStatus: GCKMediaStatus?) {
-        updateMediaStatusDelegate?.updateMediaStatus(mediaInfo: mediaStatus?.mediaInformation)
-        setMediaInfo(with: mediaStatus?.mediaInformation)
+        guard let mediaStatus = mediaStatus else { return }
+        let playerState = mediaStatus.playerState
+        
+        switch playerState {
+        case .buffering:
+            print("Chromecast MediaClientListener: buffering")
+            chromeCastsessionStatus = .buffering
+        case .idle:
+            print("Chromecast MediaClientListener: idle")
+            chromeCastsessionStatus = .idle
+            
+            switch idleReason {
+            case .none:
+                break
+            default:
+               chromeCastsessionStatus = .switchToLocalPlay
+            }
+            
+        case .loading:
+            print("Chromecast MediaClientListener: loading")
+            chromeCastsessionStatus = .loading
+        case .paused:
+            print("Chromecast MediaClientListener: paused")
+            chromeCastsessionStatus = .paused
+        case .playing:
+            print("Chromecast MediaClientListener: playing")
+            chromeCastsessionStatus = .playing
+        case .unknown:
+            print("Chromecast MediaClientListener: unknown")
+        default:
+            print("unknown")
+        }
+        print("Chromecast MediaClientListener: didUpdatemedia \(playerState)")
+
+        updateMediaStatusDelegate?.updateMediaStatus(mediaInfo: mediaStatus.mediaInformation)
+        setMediaInfo(with: mediaStatus.mediaInformation)
     }
     
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didUpdate mediaMetadata: GCKMediaMetadata?) {
-        
+        print("Chromecast MediaClientListener: didUpdate mediaMetadata")
     }
     
     func remoteMediaClientDidUpdateQueue(_ client: GCKRemoteMediaClient) {
-        
+        print("Chromecast MediaClientListener: remoteMediaClientDidUpdateQueue \(String(describing: client.mediaStatus))")
+
     }
     
     func remoteMediaClientDidUpdatePreloadStatus(_ client: GCKRemoteMediaClient) {
-        
+        print("Chromecast MediaClientListener: remoteMediaClientDidUpdatePreloadStatus \(String(describing: client.mediaStatus))")
+
     }
 }
 

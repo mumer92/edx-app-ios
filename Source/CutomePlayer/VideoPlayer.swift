@@ -19,7 +19,8 @@ private enum PlayerState {
          ended,
          chromeCastConnected,
          playingOnChromeCast,
-         pausedOnChromeCast
+         pausedOnChromeCast,
+         readyForLocalPlay
 }
 
 private let currentItemStatusKey = "currentItem.status"
@@ -200,21 +201,21 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
             elapsedtime = Double(environment.interface?.lastPlayedInterval(forVideo: video) ?? Float(lastElapsedTime))
         }
         
-        var courseImageURL = video.summary?.videoThumbnailURL
-        if let courseID = video.course_id,
-            let course = environment.interface?.enrollmentForCourse(withID: courseID)?.course {
-            courseImageURL = course.courseImageURL
-        }
+        var thumbnail = video.summary?.videoThumbnailURL
         
-        var thumbnail = self.video?.summary?.videoThumbnailURL
-
-        if thumbnail != nil {
-            if let relativeImageURL = courseImageURL,
-                let imageURL = URL(string: relativeImageURL, relativeTo: self.environment.networkManager.baseURL) {
-                thumbnail = imageURL.absoluteString
+        if thumbnail == nil {
+            var courseImageURL: String?
+            if let courseID = video.course_id,
+                let course = environment.interface?.enrollmentForCourse(withID: courseID)?.course {
+                courseImageURL = course.courseImageURL
+                
+                if let relativeImageURL = courseImageURL,
+                    let imageURL = URL(string: relativeImageURL, relativeTo: self.environment.networkManager.baseURL) {
+                    thumbnail = imageURL.absoluteString
+                }
             }
         }
-        
+       
         let castMediaInfo = castManager.buildMediaInformation(contentID: url.absoluteString, title: video.summary?.name ?? "", description: "", studio: "", duration: 0, streamType: GCKMediaStreamType.buffered, thumbnailUrl: thumbnail, customData: nil)
         
         castManager.startPlayingItemOnChromeCast(mediaInfo: castMediaInfo, at: elapsedtime) { done in
@@ -224,6 +225,7 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
                 print("something whent wrong")
             }
         }
+        playerState = .playingOnChromeCast
     }
     
     private func pauseCastPlay() {
@@ -307,8 +309,9 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         setConstraints()
     }
     
-    private func createControls() {
+    private func createControls(isSelected: Bool = true) {
         controls = VideoPlayerControls(environment: environment, player: self)
+        controls?.setPlayPauseButtonState(isSelected: isSelected)
         controls?.delegate = self
         if let controls = controls {
             controls.tag = 100
@@ -392,6 +395,7 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         checkIfChromecastIsConnected()
         
         if mediaControlsContainerView == nil {
+            ChromeCastManager.shared.isMiniPlayerAdded = true
             createContainer()
             createMiniMediaControl()
         }
@@ -441,6 +445,7 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
             observer.playerDidFinishPlaying(note: notification)
         }
         perform(#selector(movieTimedOut), with: nil, afterDelay: playerTimeOutInterval)
+        playerState = .playing
     }
     
     private func play(at timeInterval: TimeInterval) {
@@ -583,7 +588,10 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
     
     // MARK:- Player control delegate method
     func playPausePressed(playerControls: VideoPlayerControls, isPlaying: Bool) {
-        if playerState == .playing {
+        if playerState == .readyForLocalPlay {
+            self.playLocally(video: self.video!)
+            environment.interface?.sendAnalyticsEvents(.play, withCurrentTime: currentTime, forVideo: video)
+        } else if playerState == .playing {
             pause()
             environment.interface?.sendAnalyticsEvents(.pause, withCurrentTime: currentTime, forVideo: video)
         }
@@ -794,7 +802,7 @@ extension VideoPlayer {
 extension VideoPlayer {
     private func listenForCastConnection() {
         let sessionStatusListener: (ChromeCastSessionStatus) -> Void = { status in
-            print("status: \(status)")
+            print("Chromecast Status: \(status)")
             switch status {
             case .started:
                 self.stop()
@@ -804,16 +812,10 @@ extension VideoPlayer {
                 self.stop()
                 self.removeControls()
                 self.continueCastPlay()
-            case .ended, .failed:
-                if self.playerState == .playingOnChromeCast {
-                    self.playerState = .paused
-                } else {
-                    self.playerState = .playing
-                    self.createControls()
-                    self.castManager.getPlayBackTimeFromChromeCast { timeInterval in
-                        self.playLocally(video: self.video!, at: timeInterval ?? 0.0)
-                    }
-                }
+            case .switchToLocalPlay:
+                self.playerState = .readyForLocalPlay
+                self.applyScreenOrientation()
+                self.createControls(isSelected: true)
             default: break
             }
         }
@@ -833,6 +835,7 @@ extension VideoPlayer {
         guard let parent = self.parent?.parent as? CourseContentPageViewController else { return }
         
         if mediaControlsContainerView == nil {
+            ChromeCastManager.shared.isMiniPlayerAdded = true
             createContainer()
             createMiniMediaControl()
         }
@@ -847,8 +850,10 @@ extension VideoPlayer {
         UIView.animate(withDuration: 0.3, animations: {
             parent.view.layoutIfNeeded()
         }) { _ in
-            self.mediaControlsContainerView.alpha = 1
-            self.miniMediaControlsViewController.view.alpha = 1
+            if self.mediaControlsContainerView != nil {
+                self.mediaControlsContainerView.alpha = 1
+                self.miniMediaControlsViewController.view.alpha = 1
+            }
         }
     }
     
@@ -908,6 +913,7 @@ extension VideoPlayer {
             miniMediaControlsViewController.view.removeFromSuperview()
             mediaControlsContainerView = nil
         }
+        ChromeCastManager.shared.isMiniPlayerAdded = false
     }
 }
 

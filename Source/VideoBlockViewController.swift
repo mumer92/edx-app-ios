@@ -102,12 +102,7 @@ class VideoBlockViewController : UIViewController, CourseBlockViewController, St
             self?.videoController.hideAndShowControls(isHidden: true)
         }
         rotateDeviceMessageView?.addGestureRecognizer(tapGesture)
-        if environment.config.isVideoTranscriptEnabled {
-            videoTranscriptView = VideoTranscript(environment: environment)
-            videoTranscriptView?.delegate = self
-            contentView?.addSubview(videoTranscriptView!.transcriptTableView)
-        }
-        
+        turnOnVideoTranscripts()
         view.backgroundColor = OEXStyles.shared().standardBackgroundColor()
         view.setNeedsUpdateConstraints()
         
@@ -348,6 +343,19 @@ class VideoBlockViewController : UIViewController, CourseBlockViewController, St
     }
     
     //MARK: - VideoPlayerDelegate methods
+    func turnOnVideoTranscripts() {
+        if environment.config.isVideoTranscriptEnabled {
+            videoTranscriptView = VideoTranscript(environment: environment)
+            videoTranscriptView?.delegate = self
+            videoTranscriptView?.transcriptTableView.tag = 200
+            contentView?.addSubview(videoTranscriptView!.transcriptTableView)
+        }
+    }
+    
+    func turnOffVideoTranscripts() {
+        videoTranscriptView?.transcriptTableView.removeFromSuperview()
+    }
+    
     func playerWillMoveFromWindow(videoPlayer: VideoPlayer) {
         videoPlayer.view.snp.remakeConstraints { make in
             make.top.equalTo(safeTop)

@@ -27,6 +27,8 @@ private let currentItemStatusKey = "currentItem.status"
 private let currentItemPlaybackLikelyToKeepUpKey = "currentItem.playbackLikelyToKeepUp"
 
 protocol VideoPlayerDelegate: class {
+    func turnOnVideoTranscripts()
+    func turnOffVideoTranscripts()
     func playerDidLoadTranscripts(videoPlayer:VideoPlayer, transcripts: [TranscriptObject])
     func playerWillMoveFromWindow(videoPlayer: VideoPlayer)
     func playerDidTimeout(videoPlayer: VideoPlayer)
@@ -332,21 +334,26 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
     }
     
     private func addOverlyForRemotePlay() {
-        let overlayView = UIView(frame: self.view.frame)
-        overlayView.tag = 800
-        self.view.addSubview(overlayView)
-        let label = UILabel(frame: view.frame)
-        label.text = "Video is being casted"
-        label.textAlignment = .center
-        label.textColor = .white
-        label.center = overlayView.center
-        overlayView.addSubview(label)
+//        let overlayView = UIView(frame: self.view.frame)
+//        overlayView.tag = 800
+//        self.view.addSubview(overlayView)
+//        let label = UILabel(frame: view.frame)
+//        label.text = "Video is being casted"
+//        label.textAlignment = .center
+//        label.textColor = .white
+//        label.center = overlayView.center
+//        label.tag = 120
+//        overlayView.addSubview(label)
     }
     
     private func removeOverlayForRemotePlay() {
-        if let viewWithTag = self.view.viewWithTag(800) {
-            viewWithTag.removeFromSuperview()
-        }
+//        if let viewWithTag = self.view.viewWithTag(800) {
+//            viewWithTag.isHidden = true
+//            if let subViewWithTag = viewWithTag.viewWithTag(120) {
+//                subViewWithTag.removeFromSuperview()
+//            }
+//            viewWithTag.removeFromSuperview()
+//        }
     }
     
     private func initializeSubtitles() {
@@ -435,6 +442,7 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         } else {
             applyScreenOrientation()
             createControls()
+            playerDelegate?.turnOnVideoTranscripts()
             playLocally(video: video)
         }
     }
@@ -825,24 +833,28 @@ extension VideoPlayer {
             print("Chromecast Status: \(status)")
             switch status {
             case .playing:
+                //self.playerDelegate?.turnOffVideoTranscripts()
                 self.addOverlyForRemotePlay()
             case .started:
+                //self.playerDelegate?.turnOffVideoTranscripts()
                 self.stop()
                 self.removeControls()
                 self.addOverlyForRemotePlay()
                 self.playRemotely(video: self.video!)
             case .resumed:
+                //self.playerDelegate?.turnOffVideoTranscripts()
                 self.stop()
                 self.removeControls()
                 self.addOverlyForRemotePlay()
                 self.continueCastPlay()
             case .ended, .failed:
+                //self.playerDelegate?.turnOnVideoTranscripts()
+                self.removeOverlayForRemotePlay()
+                self.createControls()
                 if self.playerState == .playingOnChromeCast {
                     self.playerState = .paused
                 } else {
                     self.playerState = .playing
-                    self.removeOverlayForRemotePlay()
-                    self.createControls()
                     self.castManager.getPlayBackTimeFromChromeCast { timeInterval in
                         self.playLocally(video: self.video!, at: timeInterval ?? 0.0)
                     }

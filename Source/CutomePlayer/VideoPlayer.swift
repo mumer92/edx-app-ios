@@ -20,7 +20,7 @@ private enum PlayerState {
          chromeCastConnected,
          playingOnChromeCast,
          pausedOnChromeCast,
-         readyForLocalPlay
+         readyForRemotePlay
 }
 
 private let currentItemStatusKey = "currentItem.status"
@@ -323,8 +323,10 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
     }
     
     private func removeControls() {
-        if let view = self.view.viewWithTag(100) {
-            view.removeFromSuperview()
+        UIView.animate(withDuration: 0.2) {
+            if let view = self.view.viewWithTag(100) {
+                view.removeFromSuperview()
+            }
         }
     }
     
@@ -588,8 +590,9 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
     
     // MARK:- Player control delegate method
     func playPausePressed(playerControls: VideoPlayerControls, isPlaying: Bool) {
-        if playerState == .readyForLocalPlay {
-            self.playLocally(video: self.video!)
+        if playerState == .readyForRemotePlay {
+            removeControls()
+            playRemotely(video: video!)
             environment.interface?.sendAnalyticsEvents(.play, withCurrentTime: currentTime, forVideo: video)
         } else if playerState == .playing {
             pause()
@@ -813,7 +816,7 @@ extension VideoPlayer {
                 self.removeControls()
                 self.continueCastPlay()
             case .switchToLocalPlay:
-                self.playerState = .readyForLocalPlay
+                self.playerState = .readyForRemotePlay
                 self.applyScreenOrientation()
                 self.createControls(isSelected: true)
             default: break

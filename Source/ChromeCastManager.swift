@@ -22,7 +22,7 @@ enum ChromeCastSessionStatus {
     case loading
     case playing
     case paused
-    case switchToLocalPlay
+    case finishedPlaying
 }
 
 protocol CastManagerAvailableDeviceDelegate: class {
@@ -362,7 +362,7 @@ extension ChromeCastManager: GCKRemoteMediaClientListener {
             case .none:
                 break
             default:
-               chromeCastsessionStatus = .switchToLocalPlay
+               chromeCastsessionStatus = .finishedPlaying
             }
             
         case .loading:

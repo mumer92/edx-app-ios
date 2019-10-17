@@ -170,6 +170,7 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        createPlayer()
         view.backgroundColor = .black
         loadingIndicatorView.hidesWhenStopped = true
         listenForCastConnection()
@@ -309,7 +310,7 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         setConstraints()
     }
     
-    private func createControls(isSelected: Bool = true) {
+    private func createControls(isSelected: Bool = false) {
         controls = VideoPlayerControls(environment: environment, player: self)
         controls?.setPlayPauseButtonState(isSelected: isSelected)
         controls?.delegate = self
@@ -324,9 +325,27 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
     
     private func removeControls() {
         UIView.animate(withDuration: 0.2) {
-            if let view = self.view.viewWithTag(100) {
+            if let view = self.playerView.viewWithTag(100) {
                 view.removeFromSuperview()
             }
+        }
+    }
+    
+    private func addOverlyForRemotePlay() {
+        let overlayView = UIView(frame: self.view.frame)
+        overlayView.tag = 800
+        self.view.addSubview(overlayView)
+        let label = UILabel(frame: view.frame)
+        label.text = "Video is being casted"
+        label.textAlignment = .center
+        label.textColor = .white
+        label.center = overlayView.center
+        overlayView.addSubview(label)
+    }
+    
+    private func removeOverlayForRemotePlay() {
+        if let viewWithTag = self.view.viewWithTag(800) {
+            viewWithTag.removeFromSuperview()
         }
     }
     
@@ -391,7 +410,6 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        createPlayer()
         isVisible = true
         applyScreenOrientation()
         checkIfChromecastIsConnected()
@@ -432,8 +450,7 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         let fileExists : Bool = fileManager.fileExists(atPath: path)
         if fileExists {
             url = URL(fileURLWithPath: path)
-        }
-        else if video.downloadState == .complete {
+        } else if video.downloadState == .complete {
             playerDelegate?.playerDidFailedPlaying(videoPlayer: self, errorMessage: Strings.videoContentNotAvailable)
         }
         let playerItem = AVPlayerItem(url: url)
@@ -807,17 +824,33 @@ extension VideoPlayer {
         let sessionStatusListener: (ChromeCastSessionStatus) -> Void = { status in
             print("Chromecast Status: \(status)")
             switch status {
+            case .playing:
+                self.addOverlyForRemotePlay()
             case .started:
                 self.stop()
                 self.removeControls()
+                self.addOverlyForRemotePlay()
                 self.playRemotely(video: self.video!)
             case .resumed:
                 self.stop()
                 self.removeControls()
+                self.addOverlyForRemotePlay()
                 self.continueCastPlay()
-            case .switchToLocalPlay:
+            case .ended, .failed:
+                if self.playerState == .playingOnChromeCast {
+                    self.playerState = .paused
+                } else {
+                    self.playerState = .playing
+                    self.removeOverlayForRemotePlay()
+                    self.createControls()
+                    self.castManager.getPlayBackTimeFromChromeCast { timeInterval in
+                        self.playLocally(video: self.video!, at: timeInterval ?? 0.0)
+                    }
+                }
+            case .finishedPlaying:
                 self.playerState = .readyForRemotePlay
                 self.applyScreenOrientation()
+                self.removeOverlayForRemotePlay()
                 self.createControls(isSelected: true)
             default: break
             }
@@ -869,8 +902,22 @@ extension VideoPlayer {
         
         parent.view.addSubview(mediaControlsContainerView)
         
+        
         mediaControlsContainerView.snp.makeConstraints { make in
-            make.bottom.equalTo(parent.view.snp.bottom).offset(-1 * (parent.navigationController?.toolbar.frame.size.height ?? -100))
+            var bottomSafeArea: CGFloat
+            
+            if #available(iOS 11.0, *) {
+                let window = UIApplication.shared.keyWindow
+                bottomSafeArea = window?.safeAreaInsets.bottom ?? 34
+            } else {
+                bottomSafeArea = bottomLayoutGuide.length
+            }
+            
+            let toolbarHeight = parent.navigationController?.toolbar.frame.size.height ?? 50
+            
+            let bottomContrainHeight = bottomSafeArea + toolbarHeight
+            
+            make.bottom.equalTo(parent.view.snp.bottom).offset(-1 * (bottomContrainHeight))
             make.leading.equalTo(parent.view)
             make.trailing.equalTo(parent.view)
             make.height.equalTo(mediaControlsContainerView)

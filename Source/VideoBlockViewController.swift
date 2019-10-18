@@ -102,7 +102,15 @@ class VideoBlockViewController : UIViewController, CourseBlockViewController, St
             self?.videoController.hideAndShowControls(isHidden: true)
         }
         rotateDeviceMessageView?.addGestureRecognizer(tapGesture)
-        turnOnVideoTranscripts()
+        //turnOnVideoTranscripts()
+        
+        if environment.config.isVideoTranscriptEnabled {
+            videoTranscriptView = VideoTranscript(environment: environment)
+            videoTranscriptView?.delegate = self
+            videoTranscriptView?.transcriptTableView.tag = 200
+            contentView!.addSubview(videoTranscriptView!.transcriptTableView)
+        }
+        
         view.backgroundColor = OEXStyles.shared().standardBackgroundColor()
         view.setNeedsUpdateConstraints()
         
@@ -205,12 +213,14 @@ class VideoBlockViewController : UIViewController, CourseBlockViewController, St
             make.bottom.equalTo(safeBottom)
         }
         
-        videoTranscriptView?.transcriptTableView.snp.remakeConstraints { make in
-            make.top.equalTo(videoController.view.snp.bottom)
-            make.leading.equalTo(contentView)
-            make.trailing.equalTo(contentView)
-            let barHeight = navigationController?.toolbar.frame.size.height ?? 0.0
-            make.bottom.equalTo(view.snp.bottom).offset(-barHeight)
+        if let contentView = contentView, let tableView = contentView.viewWithTag(200) as? UITableView {
+            tableView.snp.remakeConstraints { make in
+                make.top.equalTo(videoController.view.snp.bottom)
+                make.leading.equalTo(contentView)
+                make.trailing.equalTo(contentView)
+                let barHeight = navigationController?.toolbar.frame.size.height ?? 0.0
+                make.bottom.equalTo(view.snp.bottom).offset(-barHeight)
+            }
         }
     }
     
@@ -344,16 +354,11 @@ class VideoBlockViewController : UIViewController, CourseBlockViewController, St
     
     //MARK: - VideoPlayerDelegate methods
     func turnOnVideoTranscripts() {
-        if environment.config.isVideoTranscriptEnabled {
-            videoTranscriptView = VideoTranscript(environment: environment)
-            videoTranscriptView?.delegate = self
-            videoTranscriptView?.transcriptTableView.tag = 200
-            contentView?.addSubview(videoTranscriptView!.transcriptTableView)
-        }
+        videoTranscriptView?.transcriptTableView.isHidden = false
     }
     
     func turnOffVideoTranscripts() {
-        videoTranscriptView?.transcriptTableView.removeFromSuperview()
+        videoTranscriptView?.transcriptTableView.isHidden = true
     }
     
     func playerWillMoveFromWindow(videoPlayer: VideoPlayer) {

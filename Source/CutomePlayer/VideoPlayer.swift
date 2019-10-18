@@ -225,7 +225,7 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
             if done {
                 print("done")
             } else {
-                print("something whent wrong")
+                print("something went wrong")
             }
         }
         playerState = .playingOnChromeCast
@@ -832,23 +832,23 @@ extension VideoPlayer {
         let sessionStatusListener: (ChromeCastSessionStatus) -> Void = { status in
             print("Chromecast Status: \(status)")
             switch status {
-            case .playing:
+            //case .playing:
                 //self.playerDelegate?.turnOffVideoTranscripts()
-                self.addOverlyForRemotePlay()
+                //self.addOverlyForRemotePlay()
             case .started:
-                //self.playerDelegate?.turnOffVideoTranscripts()
+                self.playerDelegate?.turnOffVideoTranscripts()
                 self.stop()
                 self.removeControls()
                 self.addOverlyForRemotePlay()
                 self.playRemotely(video: self.video!)
             case .resumed:
-                //self.playerDelegate?.turnOffVideoTranscripts()
+                self.playerDelegate?.turnOffVideoTranscripts()
                 self.stop()
                 self.removeControls()
                 self.addOverlyForRemotePlay()
                 self.continueCastPlay()
             case .ended, .failed:
-                //self.playerDelegate?.turnOnVideoTranscripts()
+                self.playerDelegate?.turnOnVideoTranscripts()
                 self.removeOverlayForRemotePlay()
                 self.createControls()
                 if self.playerState == .playingOnChromeCast {

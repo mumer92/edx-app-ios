@@ -103,7 +103,7 @@ class ChromeCastManager: NSObject {
     }
     
     private func initializeDiscovery() {
-        discoveryManager = GCKCastContext.sharedInstance().discoveryManager
+        discoveryManager = castContext.discoveryManager
         discoveryManager.add(self)
         discoveryManager.passiveScan = true
         discoveryManager.startDiscovery()
@@ -274,7 +274,6 @@ class ChromeCastManager: NSObject {
     }
     
     func createMiniMediaControl() -> GCKUIMiniMediaControlsViewController{
-        let castContext = GCKCastContext.sharedInstance()
         return castContext.createMiniMediaControlsViewController()
     }
 }

@@ -68,6 +68,7 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
     private var miniMediaControlsViewController: GCKUIMiniMediaControlsViewController!
     
     private var overlayLabel: UILabel?
+    private var playOverlayButton: UIButton?
     
     // UIPageViewController keep multiple viewControllers simultanously for smooth switching
     // on view transitioning this method calls for every viewController which cause framing issue for fullscreen mode
@@ -331,6 +332,24 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
             
         }
         setConstraints()
+    }
+    
+    private func createPlayButtonOverlay() {
+        if playOverlayButton == nil {
+            playOverlayButton = UIButton(frame: CGRect(x: 0, y: 0, width: 26, height: 26))
+            playOverlayButton?.tintColor = .white
+            playOverlayButton?.setImage(UIImage.PlayIcon(), for: .normal)
+            playOverlayButton?.addTarget(self, action: #selector(playButtonAction), for: .touchUpInside)
+            self.view.addSubview(playOverlayButton!)
+            playOverlayButton?.center = self.view.center
+        }
+    }
+    
+    @objc func playButtonAction(sender: UIButton!) {
+        playOverlayButton?.isHidden = true
+        playOverlayButton?.removeFromSuperview()
+        playOverlayButton = nil
+        playRemotely(video: video!)
     }
     
     private func createControls(isSelected: Bool = false) {
@@ -849,28 +868,25 @@ extension VideoPlayer {
         let sessionStatusListener: (ChromeCastSessionStatus) -> Void = { status in
             print("Chromecast Status: \(status)")
             switch status {
-            case .playing:
+            case .connected, .playing:
                 self.playerDelegate?.turnOffVideoTranscripts()
                 self.addOverlyForRemotePlay()
             case .started:
                 self.playerDelegate?.turnOffVideoTranscripts()
                 self.stop()
-                self.hideAndShowControls(isHidden: true)
-//                self.removeControls()
+                self.removeControls()
                 self.addOverlyForRemotePlay()
                 self.playRemotely(video: self.video!)
             case .resumed:
                 self.playerDelegate?.turnOffVideoTranscripts()
                 self.stop()
-                self.hideAndShowControls(isHidden: true)
-//                self.removeControls()
+                self.removeControls()
                 self.addOverlyForRemotePlay()
                 self.continueCastPlay()
             case .ended, .failed:
                 self.playerDelegate?.turnOnVideoTranscripts()
                 self.removeOverlayForRemotePlay()
-//                self.createControls()
-                self.controls?.hideAndShowControlsExceptPlayPause(isHidden: true)
+                self.createControls()
                 if self.playerState == .playingOnChromeCast {
                     self.playerState = .paused
                 } else {
@@ -883,9 +899,8 @@ extension VideoPlayer {
                 self.playerState = .readyForRemotePlay
                 self.applyScreenOrientation()
                 self.removeOverlayForRemotePlay()
-                self.controls?.hideAndShowControlsExceptPlayPause(isHidden: true)
-
-//                self.createControls(isSelected: true)
+                //self.createControls(isSelected: true)
+                self.createPlayButtonOverlay()
             default: break
             }
         }

@@ -231,10 +231,10 @@ static const BOOL kDebugLoggingEnabled = YES;
     }
 
     //Initialize Fabric
-//    OEXFabricConfig* fabric = [config fabricConfig];
-//    if(fabric.appKey && fabric.isEnabled) {
-//        [Fabric with:@[CrashlyticsKit]];
-//    }
+    OEXFabricConfig* fabric = [config fabricConfig];
+    if(fabric.appKey && fabric.isEnabled) {
+        [Fabric with:@[CrashlyticsKit]];
+    }
 }
 
 - (void) configureFabricKits:(NSDictionary*) launchOptions {

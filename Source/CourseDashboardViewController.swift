@@ -83,11 +83,11 @@ class CourseDashboardViewController: UITabBarController, UITabBarControllerDeleg
             let shareItem = UIBarButtonItem(customView: shareButton)
             navigationItems.append(shareItem)
         }
+        navigationItems.append(castButtonItem)
+
         if let controller = selectedViewController as? CourseOutlineViewController, controller.courseOutlineMode == .full {
             navigationItems.append(progressController.navigationItem())
-        }
-        
-        navigationItems.append(castButtonItem)
+        }        
         
         navigationItem.rightBarButtonItems = navigationItems
     }

@@ -60,7 +60,9 @@ class ChromeCastManager: NSObject {
     private var chormeCastsessionStatusListener: ChromeCastSessionCompletion?
     var chromeCastsessionStatus: ChromeCastSessionStatus = .initial {
         didSet {
-            chormeCastsessionStatusListener?(chromeCastsessionStatus)
+            DispatchQueue.main.async {
+                self.chormeCastsessionStatusListener?(self.chromeCastsessionStatus)
+            }
         }
     }
     
@@ -187,9 +189,9 @@ class ChromeCastManager: NSObject {
         return metadata
     }
     
-    func startPlayingItemOnChromeCast(mediaInfo: GCKMediaInformation, at time: TimeInterval, completion: CastItemCompletion) {
+    func startPlayingItemOnChromeCast(mediaInfo: GCKMediaInformation, at time: TimeInterval, completion: CastItemCompletion? = nil) {
         guard let currentCastSession = castSessionManager.currentSession else {
-            completion(false)
+            completion?(false)
             return
         }
         
@@ -199,7 +201,7 @@ class ChromeCastManager: NSObject {
         
         chromeCastsessionStatus = .connected
         
-        completion(true)
+        completion?(true)
     }
     
     func playItemOnChromeCast(to time: TimeInterval?, completion: CastItemCompletion) {

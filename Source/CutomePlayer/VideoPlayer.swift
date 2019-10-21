@@ -180,22 +180,18 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         loadingIndicatorView.hidesWhenStopped = true
         listenForCastConnection()
         
+        // Introductory overlay needs reference to castButton which is available in CourseContentPageViewController,
+        // if it is called directly, is has been not initialized yet to it gives 0,0 as is container,
+        // so we need to get castButton from navigationbar item then decouple is and assgin to call to get overlay
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            if let parentController = self.parent?.parent as? CastButtonDelegate {
-                let button = parentController.castButton
-                self.castManager.presentInductoryOverlay(with: button)
+            if let parentController = self.parent?.parent as? CourseContentPageViewController {
+                if let items = parentController.navigationItem.rightBarButtonItems {
+                let button = items[0]
+                    if let view = button.customView as? GCKUICastButton {
+                        self.castManager.presentInductoryOverlay(with: view)
+                    }
+                }
             }
-        }
-        
-        
-//        NotificationCenter.default.addObserver(self, selector: #selector(castDeviceDidChange),
-//                                               name: NSNotification.Name.gckCastStateDidChange,
-//                                               object: castManager)
-    }
-    
-    @objc func castDeviceDidChange(_: Notification) {
-        if GCKCastContext.sharedInstance().castState != .noDevicesAvailable {
-           
         }
     }
     
@@ -206,18 +202,11 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
     }
     
     private func playRemotely(video: OEXHelperVideoDownload) {
-        guard let videoURL = video.summary?.videoURL, var url = URL(string: videoURL) else {
+        guard let videoURL = video.summary?.videoURL, let url = URL(string: videoURL) else {
             return
         }
         
         self.video = video
-        
-        let fileManager = FileManager.default
-        let path = "\(video.filePath).mp4"
-        let fileExists : Bool = fileManager.fileExists(atPath: path)
-        if fileExists {
-            url = URL(fileURLWithPath: path)
-        }
         loadingIndicatorView.stopAnimating()
 
         var elapsedtime = 0.0
@@ -243,13 +232,7 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
        
         let castMediaInfo = castManager.buildMediaInformation(contentID: url.absoluteString, title: video.summary?.name ?? "", description: "", studio: "", duration: 0, streamType: GCKMediaStreamType.buffered, thumbnailUrl: thumbnail, customData: nil)
         
-        castManager.startPlayingItemOnChromeCast(mediaInfo: castMediaInfo, at: elapsedtime) { done in
-            if done {
-                print("done")
-            } else {
-                print("something went wrong")
-            }
-        }
+        castManager.startPlayingItemOnChromeCast(mediaInfo: castMediaInfo, at: elapsedtime)
         playerState = .playingOnChromeCast
     }
     

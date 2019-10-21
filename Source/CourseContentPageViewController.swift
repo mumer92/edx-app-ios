@@ -115,7 +115,9 @@ public class CourseContentPageViewController : UIPageViewController, UIPageViewC
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        addCastButtonToNavigationBar()
+        if ChromeCastManager.shared.isconnectedToChromeCast {
+            addCastButtonToNavigationBar()
+        }
     }
     
     private func addStreamListeners() {

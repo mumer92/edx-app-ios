@@ -63,6 +63,8 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
     private let preferredTimescale:Int32 = 100
     fileprivate var fullScreenContainerView: UIView?
     
+    fileprivate let castManager = ChromeCastManager.shared
+
     private var mediaControlsContainerView: UIView!
     private var miniMediaControlsHeightConstraint: NSLayoutConstraint!
     private var miniMediaControlsViewController: GCKUIMiniMediaControlsViewController!
@@ -161,8 +163,6 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         return .portrait
     }
     
-    fileprivate let castManager = ChromeCastManager.shared
-    
     init(environment : Environment) {
         self.environment = environment
         
@@ -191,65 +191,6 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
                         self.castManager.presentInductoryOverlay(with: view)
                     }
                 }
-            }
-        }
-    }
-    
-    func checkIfChromecastIsConnected() {
-        if castManager.isconnectedToChromeCast {
-            playerState = .chromeCastConnected
-        }
-    }
-    
-    private func playRemotely(video: OEXHelperVideoDownload) {
-        guard let videoURL = video.summary?.videoURL, let url = URL(string: videoURL) else {
-            return
-        }
-        
-        self.video = video
-        loadingIndicatorView.stopAnimating()
-
-        var elapsedtime = 0.0
-        
-        if let video = self.video {
-            elapsedtime = Double(environment.interface?.lastPlayedInterval(forVideo: video) ?? Float(lastElapsedTime))
-        }
-        
-        var thumbnail = video.summary?.videoThumbnailURL
-        
-        if thumbnail == nil {
-            var courseImageURL: String?
-            if let courseID = video.course_id,
-                let course = environment.interface?.enrollmentForCourse(withID: courseID)?.course {
-                courseImageURL = course.courseImageURL
-                
-                if let relativeImageURL = courseImageURL,
-                    let imageURL = URL(string: relativeImageURL, relativeTo: self.environment.networkManager.baseURL) {
-                    thumbnail = imageURL.absoluteString
-                }
-            }
-        }
-       
-        let castMediaInfo = castManager.buildMediaInformation(contentID: url.absoluteString, title: video.summary?.name ?? "", description: "", studio: "", duration: 0, streamType: GCKMediaStreamType.buffered, thumbnailUrl: thumbnail, customData: nil)
-        
-        castManager.startPlayingItemOnChromeCast(mediaInfo: castMediaInfo, at: elapsedtime)
-        playerState = .playingOnChromeCast
-    }
-    
-    private func pauseCastPlay() {
-        playerState = .pausedOnChromeCast
-        castManager.pauseItemOnChromeCast(at: nil) { (done) in
-            if !done {
-                self.playerState = .paused
-            }
-        }
-    }
-    
-    private func continueCastPlay() {
-        playerState = .playingOnChromeCast
-        castManager.playItemOnChromeCast(to: nil) { (done) in
-            if !done {
-                self.playerState = .paused
             }
         }
     }
@@ -354,24 +295,6 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
                 view.removeFromSuperview()
             }
         }
-    }
-    
-    private func addOverlyForRemotePlay() {
-        if overlayLabel == nil {
-            overlayLabel = UILabel(frame: view.frame)
-            overlayLabel?.text = "Video is casting to remote device"
-            overlayLabel?.textAlignment = .center
-            overlayLabel?.textColor = .white
-            overlayLabel?.center = self.view.center
-            overlayLabel?.tag = 120
-            self.view.addSubview(overlayLabel!)
-        }
-       
-        overlayLabel?.isHidden = false
-    }
-    
-    private func removeOverlayForRemotePlay() {
-        overlayLabel?.isHidden = true
     }
     
     private func initializeSubtitles() {
@@ -846,59 +769,92 @@ extension VideoPlayer {
     }
 }
 
-extension VideoPlayer {
-    private func listenForCastConnection() {
-        let sessionStatusListener: (ChromeCastSessionStatus) -> Void = { status in
-            print("Chromecast Status: \(status)")
-            switch status {
-            case .connected, .playing:
-                self.playerDelegate?.turnOffVideoTranscripts()
-                self.addOverlyForRemotePlay()
-            case .started:
-                self.playerDelegate?.turnOffVideoTranscripts()
-                self.stop()
-                self.removeControls()
-                self.addOverlyForRemotePlay()
-                self.playRemotely(video: self.video!)
-            case .resumed:
-                self.playerDelegate?.turnOffVideoTranscripts()
-                self.stop()
-                self.removeControls()
-                self.addOverlyForRemotePlay()
-                self.continueCastPlay()
-            case .ended, .failed:
-                self.playerDelegate?.turnOnVideoTranscripts()
-                self.removeOverlayForRemotePlay()
-                self.createControls()
-                if self.playerState == .playingOnChromeCast {
-                    self.playerState = .paused
-                } else {
-                    self.playerState = .playing
-                    self.castManager.getPlayBackTimeFromChromeCast { timeInterval in
-                        self.playLocally(video: self.video!, at: timeInterval ?? 0.0)
-                    }
-                }
-            case .finishedPlaying:
-                self.playerState = .readyForRemotePlay
-                self.applyScreenOrientation()
-                self.removeOverlayForRemotePlay()
-                //self.createControls(isSelected: true)
-                self.createPlayButtonOverlay()
-            default: break
-            }
-        }
-        
-        castManager.addChromeCastSessionStatusListener(listener: sessionStatusListener)
-    }
-}
-
 extension VideoPlayer: GCKUIMiniMediaControlsViewControllerDelegate {
     public func miniMediaControlsViewController(_ miniMediaControlsViewController: GCKUIMiniMediaControlsViewController, shouldAppear: Bool) {
         updateControlBarsVisibility()
     }
 }
 
+// MARK - ChromeCast Helpers
+// VideoPlayer Extension that contains ChromeCast related stuff
 extension VideoPlayer {
+    func checkIfChromecastIsConnected() {
+        if castManager.isconnectedToChromeCast {
+            playerState = .chromeCastConnected
+        }
+    }
+    
+    private func playRemotely(video: OEXHelperVideoDownload) {
+        guard let videoURL = video.summary?.videoURL, let url = URL(string: videoURL) else {
+            return
+        }
+        
+        self.video = video
+        loadingIndicatorView.stopAnimating()
+        
+        var elapsedtime = 0.0
+        
+        if let video = self.video {
+            elapsedtime = Double(environment.interface?.lastPlayedInterval(forVideo: video) ?? Float(lastElapsedTime))
+        }
+        
+        var thumbnail = video.summary?.videoThumbnailURL
+        
+        if thumbnail == nil {
+            var courseImageURL: String?
+            if let courseID = video.course_id,
+                let course = environment.interface?.enrollmentForCourse(withID: courseID)?.course {
+                courseImageURL = course.courseImageURL
+                
+                if let relativeImageURL = courseImageURL,
+                    let imageURL = URL(string: relativeImageURL, relativeTo: self.environment.networkManager.baseURL) {
+                    thumbnail = imageURL.absoluteString
+                }
+            }
+        }
+        
+        let castMediaInfo = castManager.buildMediaInformation(contentID: url.absoluteString, title: video.summary?.name ?? "", description: "", studio: "", duration: 0, streamType: GCKMediaStreamType.buffered, thumbnailUrl: thumbnail, customData: nil)
+        
+        castManager.startPlayingItemOnChromeCast(mediaInfo: castMediaInfo, at: elapsedtime)
+        playerState = .playingOnChromeCast
+    }
+    
+    private func pauseCastPlay() {
+        playerState = .pausedOnChromeCast
+        castManager.pauseItemOnChromeCast(at: nil) { (done) in
+            if !done {
+                self.playerState = .paused
+            }
+        }
+    }
+    
+    private func continueCastPlay() {
+        playerState = .playingOnChromeCast
+        castManager.playItemOnChromeCast(to: nil) { (done) in
+            if !done {
+                self.playerState = .paused
+            }
+        }
+    }
+    
+    private func addOverlyForRemotePlay() {
+        if overlayLabel == nil {
+            overlayLabel = UILabel(frame: view.frame)
+            overlayLabel?.text = "Video is casting to remote device"
+            overlayLabel?.textAlignment = .center
+            overlayLabel?.textColor = .white
+            overlayLabel?.center = self.view.center
+            overlayLabel?.tag = 120
+            self.view.addSubview(overlayLabel!)
+        }
+        
+        overlayLabel?.isHidden = false
+    }
+    
+    private func removeOverlayForRemotePlay() {
+        overlayLabel?.isHidden = true
+    }
+    
     fileprivate func updateControlBarsVisibility() {
         guard let parent = self.parent?.parent as? CourseContentPageViewController else { return }
         
@@ -996,6 +952,50 @@ extension VideoPlayer {
             mediaControlsContainerView = nil
         }
         castManager.isMiniPlayerAdded = false
+    }
+    
+    private func listenForCastConnection() {
+        let sessionStatusListener: (ChromeCastSessionStatus) -> Void = { status in
+            print("Chromecast Status: \(status)")
+            switch status {
+            case .connected, .playing:
+                self.playerDelegate?.turnOffVideoTranscripts()
+                self.addOverlyForRemotePlay()
+            case .started:
+                self.playerDelegate?.turnOffVideoTranscripts()
+                self.stop()
+                self.removeControls()
+                self.addOverlyForRemotePlay()
+                self.playRemotely(video: self.video!)
+            case .resumed:
+                self.playerDelegate?.turnOffVideoTranscripts()
+                self.stop()
+                self.removeControls()
+                self.addOverlyForRemotePlay()
+                self.continueCastPlay()
+            case .ended, .failed:
+                self.playerDelegate?.turnOnVideoTranscripts()
+                self.removeOverlayForRemotePlay()
+                self.createControls()
+                if self.playerState == .playingOnChromeCast {
+                    self.playerState = .paused
+                } else {
+                    self.playerState = .playing
+                    self.castManager.getPlayBackTimeFromChromeCast { timeInterval in
+                        self.playLocally(video: self.video!, at: timeInterval ?? 0.0)
+                    }
+                }
+            case .finishedPlaying:
+                self.playerState = .readyForRemotePlay
+                self.applyScreenOrientation()
+                self.removeOverlayForRemotePlay()
+                //self.createControls(isSelected: true)
+                self.createPlayButtonOverlay()
+            default: break
+            }
+        }
+        
+        castManager.addChromeCastSessionStatusListener(listener: sessionStatusListener)
     }
 }
 

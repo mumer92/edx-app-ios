@@ -67,6 +67,8 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
     private var miniMediaControlsHeightConstraint: NSLayoutConstraint!
     private var miniMediaControlsViewController: GCKUIMiniMediaControlsViewController!
     
+    private var overlayLabel: UILabel?
+    
     // UIPageViewController keep multiple viewControllers simultanously for smooth switching
     // on view transitioning this method calls for every viewController which cause framing issue for fullscreen mode
     // as we are using rootViewController of keyWindow for fullscreen mode.
@@ -353,26 +355,21 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
     }
     
     private func addOverlyForRemotePlay() {
-        let overlayView = UIView(frame: self.view.frame)
-        overlayView.tag = 800
-        self.view.addSubview(overlayView)
-        let label = UILabel(frame: view.frame)
-        label.text = "Video is casting to remote device"
-        label.textAlignment = .center
-        label.textColor = .white
-        label.center = overlayView.center
-        label.tag = 120
-        overlayView.addSubview(label)
+        if overlayLabel == nil {
+            overlayLabel = UILabel(frame: view.frame)
+            overlayLabel?.text = "Video is casting to remote device"
+            overlayLabel?.textAlignment = .center
+            overlayLabel?.textColor = .white
+            overlayLabel?.center = self.view.center
+            overlayLabel?.tag = 120
+            self.view.addSubview(overlayLabel!)
+        }
+       
+        overlayLabel?.isHidden = false
     }
     
     private func removeOverlayForRemotePlay() {
-        if let viewWithTag = self.view.viewWithTag(800) {
-            viewWithTag.isHidden = true
-            if let subViewWithTag = viewWithTag.viewWithTag(120) {
-                subViewWithTag.removeFromSuperview()
-            }
-            viewWithTag.removeFromSuperview()
-        }
+        overlayLabel?.isHidden = true
     }
     
     private func initializeSubtitles() {
@@ -858,19 +855,22 @@ extension VideoPlayer {
             case .started:
                 self.playerDelegate?.turnOffVideoTranscripts()
                 self.stop()
-                self.removeControls()
+                self.hideAndShowControls(isHidden: true)
+//                self.removeControls()
                 self.addOverlyForRemotePlay()
                 self.playRemotely(video: self.video!)
             case .resumed:
                 self.playerDelegate?.turnOffVideoTranscripts()
                 self.stop()
-                self.removeControls()
+                self.hideAndShowControls(isHidden: true)
+//                self.removeControls()
                 self.addOverlyForRemotePlay()
                 self.continueCastPlay()
             case .ended, .failed:
                 self.playerDelegate?.turnOnVideoTranscripts()
                 self.removeOverlayForRemotePlay()
-                self.createControls()
+//                self.createControls()
+                self.controls?.hideAndShowControlsExceptPlayPause(isHidden: true)
                 if self.playerState == .playingOnChromeCast {
                     self.playerState = .paused
                 } else {
@@ -883,7 +883,9 @@ extension VideoPlayer {
                 self.playerState = .readyForRemotePlay
                 self.applyScreenOrientation()
                 self.removeOverlayForRemotePlay()
-                self.createControls(isSelected: true)
+                self.controls?.hideAndShowControlsExceptPlayPause(isHidden: true)
+
+//                self.createControls(isSelected: true)
             default: break
             }
         }

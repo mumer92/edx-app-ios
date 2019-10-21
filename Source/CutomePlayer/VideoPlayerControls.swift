@@ -446,6 +446,30 @@ class VideoPlayerControls: UIView, VideoPlayerSettingsDelegate {
         })
     }
     
+    @objc func hideAndShowControlsExceptPlayPause(isHidden: Bool) {
+        isControlsHidden = isHidden
+        UIView.animate(withDuration: 0.3, animations: {[weak self] in
+            let alpha: CGFloat = isHidden ? 0 : 1
+            self?.topBar.alpha = alpha
+            self?.bottomBar.alpha = alpha
+            self?.bottomBar.isUserInteractionEnabled = !isHidden
+            self?.btnPrevious.alpha = alpha
+            self?.btnNext.alpha = alpha
+            self?.btnNext.isUserInteractionEnabled = !isHidden
+            self?.btnPrevious.alpha = alpha
+            self?.btnPrevious.isUserInteractionEnabled = !isHidden
+            
+            if (!isHidden) {
+                self?.autoHide()
+            }
+            else {
+                self?.tableSettings.isHidden = true
+            }
+            }, completion: { [weak self] _ in
+                self?.updateSubtTitleConstraints()
+        })
+    }
+    
     func updateTimeLabel(elapsedTime: Float64, duration: Float64) {
         guard let duration = videoPlayer?.duration else { return }
         let totalTime: Float64 = CMTimeGetSeconds (duration)

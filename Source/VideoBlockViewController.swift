@@ -213,7 +213,7 @@ class VideoBlockViewController : UIViewController, CourseBlockViewController, St
             make.bottom.equalTo(safeBottom)
         }
         
-        if let contentView = contentView, let tableView = contentView.viewWithTag(200) as? UITableView {
+        if let tableView = contentView.viewWithTag(200) as? UITableView {
             tableView.snp.remakeConstraints { make in
                 make.top.equalTo(videoController.view.snp.bottom)
                 make.leading.equalTo(contentView)

@@ -10,23 +10,39 @@ import Foundation
 import GoogleCast
 
 protocol CastButtonDelegate {
+    var castButton: GCKUICastButton { get }
     var castButtonItem: UIBarButtonItem { get }
 }
 
 extension CastButtonDelegate where Self: UIViewController {
+    var castButton: GCKUICastButton {
+        return ChromeCastManager.shared.castButton
+    }
+    
     var castButtonItem: UIBarButtonItem {
-       return ChromeCastManager.shared.castButtonItem
+        let castButtonItem =  UIBarButtonItem(customView: castButton)
+        return castButtonItem
     }
 }
 
 extension CastButtonDelegate where Self: UIPageViewController {
+    var castButton: GCKUICastButton {
+        return ChromeCastManager.shared.castButton
+    }
+    
     var castButtonItem: UIBarButtonItem {
-        return ChromeCastManager.shared.castButtonItem
+        let castButtonItem =  UIBarButtonItem(customView: castButton)
+        return castButtonItem
     }
 }
 
 extension CastButtonDelegate where Self: UITabBarController {
+    var castButton: GCKUICastButton {
+        return ChromeCastManager.shared.castButton
+    }
+    
     var castButtonItem: UIBarButtonItem {
-        return ChromeCastManager.shared.castButtonItem
+        let castButtonItem =  UIBarButtonItem(customView: castButton)
+        return castButtonItem
     }
 }

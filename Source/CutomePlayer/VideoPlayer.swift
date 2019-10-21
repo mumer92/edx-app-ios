@@ -176,6 +176,24 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         view.backgroundColor = .black
         loadingIndicatorView.hidesWhenStopped = true
         listenForCastConnection()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            if let parentController = self.parent?.parent as? CastButtonDelegate {
+                let button = parentController.castButton
+                self.castManager.presentInductoryOverlay(with: button)
+            }
+        }
+        
+        
+//        NotificationCenter.default.addObserver(self, selector: #selector(castDeviceDidChange),
+//                                               name: NSNotification.Name.gckCastStateDidChange,
+//                                               object: castManager)
+    }
+    
+    @objc func castDeviceDidChange(_: Notification) {
+        if GCKCastContext.sharedInstance().castState != .noDevicesAvailable {
+           
+        }
     }
     
     func checkIfChromecastIsConnected() {
@@ -422,7 +440,7 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         checkIfChromecastIsConnected()
         
         if mediaControlsContainerView == nil {
-            ChromeCastManager.shared.isMiniPlayerAdded = true
+            castManager.isMiniPlayerAdded = true
             createContainer()
             createMiniMediaControl()
         }
@@ -883,7 +901,7 @@ extension VideoPlayer {
         guard let parent = self.parent?.parent as? CourseContentPageViewController else { return }
         
         if mediaControlsContainerView == nil {
-            ChromeCastManager.shared.isMiniPlayerAdded = true
+            castManager.isMiniPlayerAdded = true
             createContainer()
             createMiniMediaControl()
         }
@@ -975,7 +993,7 @@ extension VideoPlayer {
             miniMediaControlsViewController.view.removeFromSuperview()
             mediaControlsContainerView = nil
         }
-        ChromeCastManager.shared.isMiniPlayerAdded = false
+        castManager.isMiniPlayerAdded = false
     }
 }
 

@@ -82,11 +82,10 @@ class ChromeCastManager: NSObject {
     
     var isMiniPlayerAdded = false
     
-    var castButtonItem: UIBarButtonItem {
+    var castButton: GCKUICastButton {
         let castButton = GCKUICastButton(frame: CGRect(x: 0, y: 0, width: 24, height: 24))
         castButton.tintColor = OEXStyles.shared().primaryBaseColor()
-        let castButtonItem =  UIBarButtonItem(customView: castButton)
-        return castButtonItem
+        return castButton
     }
     
     private override init() {
@@ -149,6 +148,10 @@ class ChromeCastManager: NSObject {
     
     func addChromeCastSessionStatusListener(listener: @escaping ChromeCastSessionCompletion) {
         self.chormeCastsessionStatusListener = listener
+    }
+    
+    func presentInductoryOverlay(with castButton: GCKUICastButton) {
+        castContext.presentCastInstructionsViewControllerOnce(with: castButton)
     }
     
     func buildMediaInformation(contentID: String, title: String, description: String, studio: String, duration: TimeInterval, streamType: GCKMediaStreamType, thumbnailUrl: String?, customData: Any?) -> GCKMediaInformation {

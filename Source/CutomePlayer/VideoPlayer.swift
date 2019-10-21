@@ -215,7 +215,8 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         if fileExists {
             url = URL(fileURLWithPath: path)
         }
-        
+        loadingIndicatorView.stopAnimating()
+
         var elapsedtime = 0.0
         
         if let video = self.video {
@@ -352,26 +353,26 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
     }
     
     private func addOverlyForRemotePlay() {
-//        let overlayView = UIView(frame: self.view.frame)
-//        overlayView.tag = 800
-//        self.view.addSubview(overlayView)
-//        let label = UILabel(frame: view.frame)
-//        label.text = "Video is being casted"
-//        label.textAlignment = .center
-//        label.textColor = .white
-//        label.center = overlayView.center
-//        label.tag = 120
-//        overlayView.addSubview(label)
+        let overlayView = UIView(frame: self.view.frame)
+        overlayView.tag = 800
+        self.view.addSubview(overlayView)
+        let label = UILabel(frame: view.frame)
+        label.text = "Video is casting to remote device"
+        label.textAlignment = .center
+        label.textColor = .white
+        label.center = overlayView.center
+        label.tag = 120
+        overlayView.addSubview(label)
     }
     
     private func removeOverlayForRemotePlay() {
-//        if let viewWithTag = self.view.viewWithTag(800) {
-//            viewWithTag.isHidden = true
-//            if let subViewWithTag = viewWithTag.viewWithTag(120) {
-//                subViewWithTag.removeFromSuperview()
-//            }
-//            viewWithTag.removeFromSuperview()
-//        }
+        if let viewWithTag = self.view.viewWithTag(800) {
+            viewWithTag.isHidden = true
+            if let subViewWithTag = viewWithTag.viewWithTag(120) {
+                subViewWithTag.removeFromSuperview()
+            }
+            viewWithTag.removeFromSuperview()
+        }
     }
     
     private func initializeSubtitles() {
@@ -482,6 +483,7 @@ class VideoPlayer: UIViewController,VideoPlayerControlsDelegate,TranscriptManage
         let playerItem = AVPlayerItem(url: url)
         player.replaceCurrentItem(with: playerItem)
         loadingIndicatorView.startAnimating()
+        removeOverlayForRemotePlay()
         addObservers()
         //let timeInterval = TimeInterval(environment.interface?.lastPlayedInterval(forVideo: video) ?? 0)
         play(at: timeInterval)
@@ -850,9 +852,9 @@ extension VideoPlayer {
         let sessionStatusListener: (ChromeCastSessionStatus) -> Void = { status in
             print("Chromecast Status: \(status)")
             switch status {
-            //case .playing:
-                //self.playerDelegate?.turnOffVideoTranscripts()
-                //self.addOverlyForRemotePlay()
+            case .playing:
+                self.playerDelegate?.turnOffVideoTranscripts()
+                self.addOverlyForRemotePlay()
             case .started:
                 self.playerDelegate?.turnOffVideoTranscripts()
                 self.stop()

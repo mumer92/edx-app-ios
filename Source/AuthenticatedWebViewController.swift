@@ -49,8 +49,55 @@ protocol AuthenticatedWebViewControllerDelegate {
     func authenticatedWebViewController(authenticatedController: AuthenticatedWebViewController, didFinishLoading webview: WKWebView)
 }
 
+class SomeWebView: WKWebView {
+    override func load(_ request: URLRequest) -> WKNavigation? {
+        
+        let languageCookieName = "prod-edx-language-preference"
+        let languageCookieValue = "ar"
+        if #available(iOS 11.0, *) {
+            var returnValue = super.load(request)
+            
+            let languageCookie = HTTPCookie(properties: [
+                .domain: ".edx.org",
+                .path: "/",
+                .name: languageCookieValue,
+                .value: languageCookieValue,
+                .expires: NSDate(timeIntervalSinceNow: 3600)
+                ])
+            
+            getCookie(with: languageCookieName) { cookie in
+                if cookie == nil {
+                    self.configuration.websiteDataStore.httpCookieStore.setCookie(languageCookie!) {
+                        returnValue = super.load(request)
+                    }
+                }
+            }
+            return returnValue
+        } else {
+            var tempRequest = request
+            tempRequest.addValue("\(languageCookieName)=\(languageCookieValue))", forHTTPHeaderField: "Cookie")
+            return super.load(tempRequest)
+        }
+    }
+}
+
+@available(iOS 11.0, *)
+extension WKWebView {
+    private var httpCookieStore: WKHTTPCookieStore  { return WKWebsiteDataStore.default().httpCookieStore }
+    func getCookie(with name: String, completion: @escaping (HTTPCookie?)-> ()) {
+        httpCookieStore.getAllCookies { cookies in
+            for cookie in cookies {
+                if cookie.name.contains(name) {
+                    completion(cookie)
+                }
+            }
+        }
+        completion(nil)
+    }
+}
+
 private class WKWebViewContentController : WebContentController {
-    fileprivate let webView = WKWebView(frame: CGRect.zero)
+    fileprivate let webView = SomeWebView(frame: CGRect.zero)
     
     var view : UIView {
         return webView

@@ -51,12 +51,13 @@ protocol AuthenticatedWebViewControllerDelegate {
 
 class SomeWebView: WKWebView {
     override func load(_ request: URLRequest) -> WKNavigation? {
-        
+        //return super.load(request)
+
         let languageCookieName = "prod-edx-language-preference"
         let languageCookieValue = "ar"
         if #available(iOS 11.0, *) {
             var returnValue = super.load(request)
-            
+
             let languageCookie = HTTPCookie(properties: [
                 .domain: ".edx.org",
                 .path: "/",
@@ -64,7 +65,7 @@ class SomeWebView: WKWebView {
                 .value: languageCookieValue,
                 .expires: NSDate(timeIntervalSinceNow: 3600)
                 ])
-            
+
             getCookie(with: languageCookieName) { cookie in
                 if cookie == nil {
                     self.configuration.websiteDataStore.httpCookieStore.setCookie(languageCookie!) {
@@ -76,7 +77,7 @@ class SomeWebView: WKWebView {
         } else {
             var tempRequest = request
             tempRequest.addValue("\(languageCookieName)=\(languageCookieValue))", forHTTPHeaderField: "Cookie")
-            return super.load(tempRequest)
+            return super.load(request)
         }
     }
 }
